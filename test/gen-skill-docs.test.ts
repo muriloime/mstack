@@ -2544,11 +2544,7 @@ describe("setup script validation", () => {
     expect(claudeInstallSection).toContain("cleanup_prefixed_claude_symlinks");
   });
 
-  test("welcome message references SKILL_PREFIX", () => {
-    // gstack-upgrade is always called gstack-upgrade (it's the actual dir name)
-    // but the welcome section should exist near the prefix logic
-    expect(setupContent).toContain("Run /gstack-upgrade anytime");
-  });
+  // welcome message SKILL_PREFIX test removed — "Run /gstack-upgrade anytime" removed in repo simplification
 });
 
 describe("discover-skills hidden directory filtering", () => {
