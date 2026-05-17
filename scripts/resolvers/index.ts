@@ -3,26 +3,73 @@
  * Each resolver takes a TemplateContext and returns the replacement string.
  */
 
-import type { TemplateContext, ResolverFn } from './types';
+import type { TemplateContext, ResolverFn } from "./types";
 
 // Domain modules
-import { generatePreamble } from './preamble';
-import { generateTestFailureTriage } from './preamble';
-import { generateCommandReference, generateSnapshotFlags, generateBrowseSetup } from './browse';
-import { generateDesignMethodology, generateDesignHardRules, generateDesignOutsideVoices, generateDesignReviewLite, generateDesignSketch, generateDesignSetup, generateDesignMockup, generateDesignShotgunLoop, generateTasteProfile, generateUXPrinciples } from './design';
-import { generateTestBootstrap, generateTestCoverageAuditPlan, generateTestCoverageAuditShip, generateTestCoverageAuditReview } from './testing';
-import { generateReviewDashboard, generatePlanFileReviewReport, generateExitPlanModeGate, generateAntiShortcutClause, generateSpecReviewLoop, generateBenefitsFrom, generateCodexSecondOpinion, generateAdversarialStep, generateCodexPlanReview, generatePlanCompletionAuditShip, generatePlanCompletionAuditReview, generatePlanVerificationExec, generateScopeDrift, generateCrossReviewDedup } from './review';
-import { generateSlugEval, generateSlugSetup, generateBaseBranchDetect, generateDeployBootstrap, generateQAMethodology, generateCoAuthorTrailer, generateChangelogWorkflow } from './utility';
-import { generateLearningsSearch, generateLearningsLog } from './learnings';
-import { generateConfidenceCalibration } from './confidence';
-import { generateInvokeSkill } from './composition';
-import { generateReviewArmy } from './review-army';
-import { generateDxFramework } from './dx';
-import { generateModelOverlay } from './model-overlay';
-import { generateGBrainContextLoad, generateGBrainSaveResults } from './gbrain';
-import { generateQuestionPreferenceCheck, generateQuestionLog, generateInlineTuneFeedback } from './question-tuning';
-import { generateMakePdfSetup } from './make-pdf';
-import { generateTasksSectionEmit, generateTasksSectionAggregate } from './tasks-section';
+import { generatePreamble } from "./preamble";
+import { generateTestFailureTriage } from "./preamble";
+import {
+  generateCommandReference,
+  generateSnapshotFlags,
+  generateBrowseSetup,
+} from "./browse";
+import {
+  generateDesignMethodology,
+  generateDesignHardRules,
+  generateDesignOutsideVoices,
+  generateDesignReviewLite,
+  generateDesignSketch,
+  generateDesignSetup,
+  generateDesignMockup,
+  generateDesignShotgunLoop,
+  generateTasteProfile,
+  generateUXPrinciples,
+} from "./design";
+import {
+  generateTestBootstrap,
+  generateTestCoverageAuditPlan,
+  generateTestCoverageAuditShip,
+  generateTestCoverageAuditReview,
+} from "./testing";
+import {
+  generateReviewDashboard,
+  generatePlanFileReviewReport,
+  generateExitPlanModeGate,
+  generateAntiShortcutClause,
+  generateSpecReviewLoop,
+  generateBenefitsFrom,
+  generateCodexSecondOpinion,
+  generateAdversarialStep,
+  generateCodexPlanReview,
+  generatePlanCompletionAuditShip,
+  generatePlanCompletionAuditReview,
+  generatePlanVerificationExec,
+  generateScopeDrift,
+  generateCrossReviewDedup,
+} from "./review";
+import {
+  generateSlugEval,
+  generateSlugSetup,
+  generateBaseBranchDetect,
+  generateDeployBootstrap,
+  generateQAMethodology,
+  generateCoAuthorTrailer,
+  generateChangelogWorkflow,
+} from "./utility";
+import { generateConfidenceCalibration } from "./confidence";
+import { generateInvokeSkill } from "./composition";
+import { generateReviewArmy } from "./review-army";
+import { generateDxFramework } from "./dx";
+import { generateModelOverlay } from "./model-overlay";
+import {
+  generateQuestionPreferenceCheck,
+  generateQuestionLog,
+  generateInlineTuneFeedback,
+} from "./question-tuning";
+import {
+  generateTasksSectionEmit,
+  generateTasksSectionAggregate,
+} from "./tasks-section";
 
 export const RESOLVERS: Record<string, ResolverFn> = {
   SLUG_EVAL: generateSlugEval,
@@ -62,8 +109,6 @@ export const RESOLVERS: Record<string, ResolverFn> = {
   PLAN_COMPLETION_AUDIT_REVIEW: generatePlanCompletionAuditReview,
   PLAN_VERIFICATION_EXEC: generatePlanVerificationExec,
   CO_AUTHOR_TRAILER: generateCoAuthorTrailer,
-  LEARNINGS_SEARCH: generateLearningsSearch,
-  LEARNINGS_LOG: generateLearningsLog,
   CONFIDENCE_CALIBRATION: generateConfidenceCalibration,
   INVOKE_SKILL: generateInvokeSkill,
   CHANGELOG_WORKFLOW: generateChangelogWorkflow,
@@ -73,12 +118,9 @@ export const RESOLVERS: Record<string, ResolverFn> = {
   MODEL_OVERLAY: generateModelOverlay,
   TASTE_PROFILE: generateTasteProfile,
   BIN_DIR: (ctx) => ctx.paths.binDir,
-  GBRAIN_CONTEXT_LOAD: generateGBrainContextLoad,
-  GBRAIN_SAVE_RESULTS: generateGBrainSaveResults,
   QUESTION_PREFERENCE_CHECK: generateQuestionPreferenceCheck,
   QUESTION_LOG: generateQuestionLog,
   INLINE_TUNE_FEEDBACK: generateInlineTuneFeedback,
-  MAKE_PDF_SETUP: generateMakePdfSetup,
   TASKS_SECTION_EMIT: generateTasksSectionEmit,
   TASKS_SECTION_AGGREGATE: generateTasksSectionAggregate,
 };

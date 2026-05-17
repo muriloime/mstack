@@ -6,66 +6,58 @@
  * no inline logic beyond tier gating.
  *
  * Each skill runs independently via `claude -p` (or the host's equivalent).
- * There is no shared loader. The preamble provides: update checks, session
- * tracking, user preferences, repo mode detection, model overlays, and
- * telemetry.
- *
- * Telemetry data flow:
- *   1. Always: local JSONL append to ~/.gstack/analytics/ (inline, inspectable)
- *   2. If _TEL != "off" AND binary exists: gstack-telemetry-log for remote reporting
+ * There is no shared loader. The preamble provides: session preferences,
+ * repo mode detection, model overlays, and skill routing.
  */
 
-
-import type { TemplateContext } from './types';
-import { generateModelOverlay } from './model-overlay';
-import { generateQuestionTuning } from './question-tuning';
+import type { TemplateContext } from "./types";
+import { generateModelOverlay } from "./model-overlay";
+import { generateQuestionTuning } from "./question-tuning";
 
 // Core bootstrap
-import { generatePreambleBash } from './preamble/generate-preamble-bash';
-import { generateUpgradeCheck } from './preamble/generate-upgrade-check';
+import { generatePreambleBash } from "./preamble/generate-preamble-bash";
+import { generateUpgradeCheck } from "./preamble/generate-upgrade-check";
 import {
   generateCompletionStatus,
   generatePlanModeInfo,
-} from './preamble/generate-completion-status';
+} from "./preamble/generate-completion-status";
 
 // One-time onboarding prompts
-import { generateLakeIntro } from './preamble/generate-lake-intro';
-import { generateTelemetryPrompt } from './preamble/generate-telemetry-prompt';
-import { generateProactivePrompt } from './preamble/generate-proactive-prompt';
-import { generateRoutingInjection } from './preamble/generate-routing-injection';
-import { generateVendoringDeprecation } from './preamble/generate-vendoring-deprecation';
-import { generateSpawnedSessionCheck } from './preamble/generate-spawned-session-check';
-import { generateWritingStyleMigration } from './preamble/generate-writing-style-migration';
+import { generateLakeIntro } from "./preamble/generate-lake-intro";
+import { generateProactivePrompt } from "./preamble/generate-proactive-prompt";
+import { generateRoutingInjection } from "./preamble/generate-routing-injection";
+import { generateVendoringDeprecation } from "./preamble/generate-vendoring-deprecation";
+import { generateSpawnedSessionCheck } from "./preamble/generate-spawned-session-check";
+import { generateWritingStyleMigration } from "./preamble/generate-writing-style-migration";
 
 // Host-specific instructions
-import { generateBrainHealthInstruction } from './preamble/generate-brain-health-instruction';
+import { generateBrainHealthInstruction } from "./preamble/generate-brain-health-instruction";
 
-// GBrain cross-machine sync (runs at skill start; end-side handled in completion-status)
-import { generateBrainSyncBlock } from './preamble/generate-brain-sync-block';
+// GBrain cross-machine sync (runs at skill start)
+import { generateBrainSyncBlock } from "./preamble/generate-brain-sync-block";
 
 // Behavioral / voice
-import { generateVoiceDirective } from './preamble/generate-voice-directive';
+import { generateVoiceDirective } from "./preamble/generate-voice-directive";
 
 // Tier 2+ context and interaction framework
-import { generateContextRecovery } from './preamble/generate-context-recovery';
-import { generateAskUserFormat } from './preamble/generate-ask-user-format';
-import { generateWritingStyle } from './preamble/generate-writing-style';
-import { generateCompletenessSection } from './preamble/generate-completeness-section';
-import { generateConfusionProtocol } from './preamble/generate-confusion-protocol';
-import { generateContinuousCheckpoint } from './preamble/generate-continuous-checkpoint';
-import { generateContextHealth } from './preamble/generate-context-health';
+import { generateContextRecovery } from "./preamble/generate-context-recovery";
+import { generateAskUserFormat } from "./preamble/generate-ask-user-format";
+import { generateWritingStyle } from "./preamble/generate-writing-style";
+import { generateCompletenessSection } from "./preamble/generate-completeness-section";
+import { generateConfusionProtocol } from "./preamble/generate-confusion-protocol";
+import { generateContinuousCheckpoint } from "./preamble/generate-continuous-checkpoint";
+import { generateContextHealth } from "./preamble/generate-context-health";
 
 // Tier 3+ repo mode + search
-import { generateRepoModeSection } from './preamble/generate-repo-mode-section';
-import { generateSearchBeforeBuildingSection } from './preamble/generate-search-before-building';
-import { generateMakePdfSetup } from './make-pdf';
+import { generateRepoModeSection } from "./preamble/generate-repo-mode-section";
+import { generateSearchBeforeBuildingSection } from "./preamble/generate-search-before-building";
 
 // Standalone export used directly by the resolver registry
-export { generateTestFailureTriage } from './preamble/generate-test-failure-triage';
+export { generateTestFailureTriage } from "./preamble/generate-test-failure-triage";
 
 // Preamble Composition (tier → sections)
 // ─────────────────────────────────────────────
-// T1: core + upgrade + lake + telemetry + voice(trimmed) + completion
+// T1: core + upgrade + lake + voice(trimmed) + completion
 // T2: T1 + voice(full) + ask + completeness + context-recovery + confusion + checkpoint + context-health
 // T3: T2 + repo-mode + search
 // T4: (same as T3 — TEST_FAILURE_TRIAGE is a separate {{}} placeholder, not preamble)
@@ -78,21 +70,21 @@ export { generateTestFailureTriage } from './preamble/generate-test-failure-tria
 export function generatePreamble(ctx: TemplateContext): string {
   const tier = ctx.preambleTier ?? 4;
   if (tier < 1 || tier > 4) {
-    throw new Error(`Invalid preamble-tier: ${tier} in ${ctx.tmplPath}. Must be 1-4.`);
+    throw new Error(
+      `Invalid preamble-tier: ${tier} in ${ctx.tmplPath}. Must be 1-4.`,
+    );
   }
   const sections = [
     generatePreambleBash(ctx),
-    ...(ctx.skillName === 'make-pdf' ? [generateMakePdfSetup(ctx)] : []),
-    // Plan-mode-skill semantics stays near the top: after bash (so _SESSION_ID /
-    // _BRANCH / _TEL env vars are live) and before all onboarding gates so
-    // models read the authoritative "AskUserQuestion satisfies plan mode's
-    // end-of-turn" rule before any other instruction. Renders for all skills
-    // (not interactive-gated); the text applies universally.
+    // Plan-mode-skill semantics stays near the top: after bash (so _BRANCH env
+    // vars are live) and before all onboarding gates so models read the
+    // authoritative "AskUserQuestion satisfies plan mode's end-of-turn" rule
+    // before any other instruction. Renders for all skills (not
+    // interactive-gated); the text applies universally.
     generatePlanModeInfo(ctx),
     generateUpgradeCheck(ctx),
     generateWritingStyleMigration(ctx),
     generateLakeIntro(),
-    generateTelemetryPrompt(ctx),
     generateProactivePrompt(ctx),
     generateRoutingInjection(ctx),
     generateVendoringDeprecation(ctx),
@@ -106,17 +98,21 @@ export function generatePreamble(ctx: TemplateContext): string {
     generateBrainSyncBlock(ctx),
     generateModelOverlay(ctx),
     generateVoiceDirective(tier),
-    ...(tier >= 2 ? [
-      generateContextRecovery(ctx),
-      generateWritingStyle(ctx),
-      generateCompletenessSection(),
-      generateConfusionProtocol(),
-      generateContinuousCheckpoint(),
-      generateContextHealth(),
-      generateQuestionTuning(ctx),
-    ] : []),
-    ...(tier >= 3 ? [generateRepoModeSection(), generateSearchBeforeBuildingSection(ctx)] : []),
+    ...(tier >= 2
+      ? [
+          generateContextRecovery(ctx),
+          generateWritingStyle(ctx),
+          generateCompletenessSection(),
+          generateConfusionProtocol(),
+          generateContinuousCheckpoint(),
+          generateContextHealth(),
+          generateQuestionTuning(ctx),
+        ]
+      : []),
+    ...(tier >= 3
+      ? [generateRepoModeSection(), generateSearchBeforeBuildingSection(ctx)]
+      : []),
     generateCompletionStatus(ctx),
   ];
-  return sections.filter(s => s && s.trim().length > 0).join('\n\n');
+  return sections.filter((s) => s && s.trim().length > 0).join("\n\n");
 }
