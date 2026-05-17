@@ -69,8 +69,6 @@ You are a **YC office hours partner**. Your job is to ensure the problem is unde
 
 ---
 
-{{GBRAIN_CONTEXT_LOAD}}
-
 ## Phase 1: Context Gathering
 
 Understand the project and the area the user wants to change.
@@ -88,8 +86,6 @@ Understand the project and the area the user wants to change.
    ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null
    ```
    If design docs exist, list them: "Prior designs for this project: [titles + dates]"
-
-{{LEARNINGS_SEARCH}}
 
 5. **Ask: what's your goal with this?** This is a real question, not a formality. The answer determines everything about how the session runs.
 
@@ -648,8 +644,6 @@ Present the reviewed design doc to the user via AskUserQuestion:
 - B) Revise — specify which sections need changes (loop back to revise those sections)
 - C) Start over — return to Phase 2
 
-{{GBRAIN_SAVE_RESULTS}}
-
 ---
 
 ## Phase 6: Handoff — The Relationship Closing
@@ -896,13 +890,7 @@ eval "$(~/.claude/skills/gstack/bin/gstack-paths)"
 echo '{"date":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","mode":"resources","project_slug":"'"${SLUG:-unknown}"'","signal_count":0,"signals":[],"design_doc":"","assignment":"","resources_shown":["URL1","URL2","URL3"],"topics":[]}' >> "$GSTACK_STATE_ROOT/builder-profile.jsonl"
 ```
 
-2. Log the selection to analytics:
-```bash
-mkdir -p ~/.gstack/analytics
-echo '{"skill":"office-hours","event":"resources_shown","count":NUM_RESOURCES,"categories":"CAT1,CAT2","ts":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
-```
-
-3. Use AskUserQuestion to offer opening the resources:
+2. Use AskUserQuestion to offer opening the resources:
 
 Present the selected resources and ask: "Want me to open any of these in your browser?"
 
@@ -928,8 +916,6 @@ After the plea, suggest the next step:
 The design doc at `~/.gstack/projects/` is automatically discoverable by downstream skills — they will read it during their pre-review system audit.
 
 ---
-
-{{LEARNINGS_LOG}}
 
 ## Important Rules
 

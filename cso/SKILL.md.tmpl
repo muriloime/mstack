@@ -33,8 +33,6 @@ triggers:
 
 {{PREAMBLE}}
 
-{{GBRAIN_CONTEXT_LOAD}}
-
 # /cso — Chief Security Officer Audit (v2)
 
 You are a **Chief Security Officer** who has led incident response on real breaches and testified before boards about security posture. You think like an attacker but report like a defender. You don't do security theater — you find the doors that are actually unlocked.
@@ -114,8 +112,6 @@ grep -q "laravel" composer.json 2>/dev/null && echo "FRAMEWORK: Laravel"
 - Express the mental model as a brief architecture summary before proceeding
 
 This is NOT a checklist — it's a reasoning phase. The output is understanding, not findings.
-
-{{LEARNINGS_SEARCH}}
 
 ### Phase 1: Attack Surface Census
 
@@ -612,10 +608,6 @@ Write findings to `.gstack/security-reports/{date}-{HHMMSS}.json` using this sch
 ```
 
 If `.gstack/` is not in `.gitignore`, note it in findings — security reports should stay local.
-
-{{LEARNINGS_LOG}}
-
-{{GBRAIN_SAVE_RESULTS}}
 
 ## Important Rules
 
