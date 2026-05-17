@@ -45,11 +45,8 @@ _link_or_copy() {
   local dst="$2"
   if [ "$IS_WINDOWS" -eq 1 ]; then
     rm -rf "$dst"
-    # Unix `ln -snf` accepts a name-only or relative-path source even when the
-    # target doesn't resolve from CWD (e.g. the connect-chrome alias points at
-    # the sibling-relative "gstack/open-gstack-browser"). On Windows the
-    # equivalent semantics don't exist — we'd need a real source on disk to
-    # copy. Skip the alias quietly rather than aborting setup under `set -e`.
+    # On Windows, skip sources that don't resolve on disk (plain `ln -snf` of
+    # a name-only or relative path has no Windows equivalent).
     if [ ! -e "$src" ]; then
       return 0
     fi
@@ -80,8 +77,6 @@ HOST="claude"
 LOCAL_INSTALL=0
 SKILL_PREFIX=1
 SKILL_PREFIX_FLAG=0
-TEAM_MODE=0
-NO_TEAM_MODE=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --host) [ -z "$2" ] && echo "Missing value for --host (expected claude, codex, kiro, factory, opencode, openclaw, hermes, gbrain, or auto)" >&2 && exit 1; HOST="$2"; shift 2 ;;
@@ -89,8 +84,6 @@ while [ $# -gt 0 ]; do
     --local) LOCAL_INSTALL=1; shift ;;
     --prefix)    SKILL_PREFIX=1; SKILL_PREFIX_FLAG=1; shift ;;
     --no-prefix) SKILL_PREFIX=0; SKILL_PREFIX_FLAG=1; shift ;;
-    --team)    TEAM_MODE=1; shift ;;
-    --no-team) NO_TEAM_MODE=1; shift ;;
     -q|--quiet) QUIET=1; shift ;;
     *) shift ;;
   esac
@@ -845,14 +838,6 @@ if [ "$INSTALL_CLAUDE" -eq 1 ]; then
     if [ -x "$GSTACK_RELINK" ]; then
       GSTACK_SKILLS_DIR="$INSTALL_SKILLS_DIR" GSTACK_INSTALL_DIR="$SOURCE_GSTACK_DIR" "$GSTACK_RELINK" >/dev/null 2>&1 || true
     fi
-    # Backwards-compat alias: /connect-chrome → /open-gstack-browser
-    _OGB_LINK="$INSTALL_SKILLS_DIR/connect-chrome"
-    if [ "$SKILL_PREFIX" -eq 1 ]; then
-      _OGB_LINK="$INSTALL_SKILLS_DIR/gstack-connect-chrome"
-    fi
-    if [ -L "$_OGB_LINK" ] || [ ! -e "$_OGB_LINK" ]; then
-      _link_or_copy "gstack/open-gstack-browser" "$_OGB_LINK"
-    fi
     if [ "$LOCAL_INSTALL" -eq 1 ]; then
       log "gstack ready (project-local)."
       log "  skills: $INSTALL_SKILLS_DIR"
@@ -912,13 +897,6 @@ if [ "$INSTALL_CLAUDE" -eq 1 ]; then
       GSTACK_RELINK="$SOURCE_GSTACK_DIR/bin/gstack-relink"
       if [ -x "$GSTACK_RELINK" ]; then
         GSTACK_SKILLS_DIR="$INSTALL_SKILLS_DIR" GSTACK_INSTALL_DIR="$SOURCE_GSTACK_DIR" "$GSTACK_RELINK" >/dev/null 2>&1 || true
-      fi
-      _OGB_LINK="$INSTALL_SKILLS_DIR/connect-chrome"
-      if [ "$SKILL_PREFIX" -eq 1 ]; then
-        _OGB_LINK="$INSTALL_SKILLS_DIR/gstack-connect-chrome"
-      fi
-      if [ -L "$_OGB_LINK" ] || [ ! -e "$_OGB_LINK" ]; then
-        _link_or_copy "gstack/open-gstack-browser" "$_OGB_LINK"
       fi
       log "gstack ready (claude)."
       log "  browse: $BROWSE_BIN"
@@ -1057,43 +1035,3 @@ if [ "$CURRENT_VERSION" != "unknown" ]; then
   echo "$CURRENT_VERSION" > "$HOME/.gstack/.last-setup-version"
 fi
 
-# 9. First-time welcome + legacy cleanup
-if [ ! -f "$HOME/.gstack/.welcome-seen" ]; then
-  log "  Welcome! Run /gstack-upgrade anytime to stay current."
-  touch "$HOME/.gstack/.welcome-seen"
-fi
-rm -f /tmp/gstack-latest-version
-
-# 10. Team mode: register/unregister SessionStart hook
-SETTINGS_HOOK="$SOURCE_GSTACK_DIR/bin/gstack-settings-hook"
-HOOK_CMD="$SOURCE_GSTACK_DIR/bin/gstack-session-update"
-
-if [ "$TEAM_MODE" -eq 1 ]; then
-  "$GSTACK_CONFIG" set auto_upgrade true 2>/dev/null || true
-  "$GSTACK_CONFIG" set team_mode true 2>/dev/null || true
-
-  # Register SessionStart hook in Claude Code settings
-  if [ -x "$SETTINGS_HOOK" ]; then
-    "$SETTINGS_HOOK" add "$HOOK_CMD" 2>/dev/null || true
-  fi
-
-  log ""
-  log "Team mode enabled: gstack will auto-update at the start of each Claude Code session."
-  log "  Hook: $HOOK_CMD"
-  log "  To disable: ./setup --no-team"
-  log ""
-  log "Bootstrap your repo:"
-  log "  cd <your-repo> && $SOURCE_GSTACK_DIR/bin/gstack-team-init required"
-fi
-
-if [ "$NO_TEAM_MODE" -eq 1 ]; then
-  "$GSTACK_CONFIG" set auto_upgrade false 2>/dev/null || true
-  "$GSTACK_CONFIG" set team_mode false 2>/dev/null || true
-
-  # Remove SessionStart hook from Claude Code settings
-  if [ -x "$SETTINGS_HOOK" ]; then
-    "$SETTINGS_HOOK" remove "$HOOK_CMD" 2>/dev/null || true
-  fi
-
-  log "Team mode disabled: auto-update hook removed."
-fi
