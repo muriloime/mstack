@@ -23,20 +23,20 @@ import { TabSession, type RefEntry } from './tab-session';
 import { resolveChromiumProfile, cleanSingletonLocks } from './config';
 
 /**
- * Detect whether GSTACK_CHROMIUM_PATH points at a custom Chromium build that
- * already bakes the gstack extension in as a component extension (e.g.,
+ * Detect whether MSTACK_CHROMIUM_PATH points at a custom Chromium build that
+ * already bakes the mstack extension in as a component extension (e.g.,
  * GStack Browser.app / GBrowser). Passing --load-extension against such a
  * binary triggers a ServiceWorkerState::SetWorkerId DCHECK because two
  * copies of the same service worker try to register.
  *
  * Resolution:
- *   1. GSTACK_CHROMIUM_KIND === 'custom-extension-baked' (preferred, explicit)
- *   2. GSTACK_CHROMIUM_PATH path substring contains 'GBrowser' or 'gbrowser'
+ *   1. MSTACK_CHROMIUM_KIND === 'custom-extension-baked' (preferred, explicit)
+ *   2. MSTACK_CHROMIUM_PATH path substring contains 'GBrowser' or 'gbrowser'
  *      (fallback for callers that only set the path)
  */
 export function isCustomChromium(): boolean {
-  if (process.env.GSTACK_CHROMIUM_KIND === 'custom-extension-baked') return true;
-  const p = process.env.GSTACK_CHROMIUM_PATH || '';
+  if (process.env.MSTACK_CHROMIUM_KIND === 'custom-extension-baked') return true;
+  const p = process.env.MSTACK_CHROMIUM_PATH || '';
   return p.includes('GBrowser') || p.includes('gbrowser');
 }
 
@@ -152,7 +152,7 @@ export class BrowserManager {
   }
 
   /**
-   * Find the gstack Chrome extension directory.
+   * Find the mstack Chrome extension directory.
    * Checks: repo root /extension, global install, dev install.
    */
   private findExtensionPath(): string | null {
@@ -163,14 +163,14 @@ export class BrowserManager {
       process.env.BROWSE_EXTENSIONS_DIR || '',
       // Relative to this source file (dev mode: browse/src/ -> ../../extension)
       path.resolve(__dirname, '..', '..', 'extension'),
-      // Global gstack install
-      path.join(process.env.HOME || '', '.claude', 'skills', 'gstack', 'extension'),
+      // Global mstack install
+      path.join(process.env.HOME || '', '.claude', 'skills', 'mstack', 'extension'),
       // Git repo root (detected via BROWSE_STATE_FILE location)
       (() => {
         const stateFile = process.env.BROWSE_STATE_FILE || '';
         if (stateFile) {
           const repoRoot = path.resolve(path.dirname(stateFile), '..');
-          return path.join(repoRoot, '.claude', 'skills', 'gstack', 'extension');
+          return path.join(repoRoot, '.claude', 'skills', 'mstack', 'extension');
         }
         return '';
       })(),
@@ -249,7 +249,7 @@ export class BrowserManager {
     // Chromium crash → exit with clear message
     this.browser.on('disconnected', () => {
       console.error('[browse] FATAL: Chromium process crashed or was killed. Server exiting.');
-      console.error('[browse] Console/network logs flushed to .gstack/browse-*.log');
+      console.error('[browse] Console/network logs flushed to .mstack/browse-*.log');
       process.exit(1);
     });
 
@@ -279,7 +279,7 @@ export class BrowserManager {
 
   // ─── Headed Mode ─────────────────────────────────────────────
   /**
-   * Launch Playwright's bundled Chromium in headed mode with the gstack
+   * Launch Playwright's bundled Chromium in headed mode with the mstack
    * Chrome extension auto-loaded. Uses launchPersistentContext() which
    * is required for extension loading (launch() + newContext() can't
    * load extensions).
@@ -293,7 +293,7 @@ export class BrowserManager {
     this.tabSessions.clear();
     this.nextTabId = 1;
 
-    // Find the gstack extension directory for auto-loading
+    // Find the mstack extension directory for auto-loading
     const extensionPath = this.findExtensionPath();
     const launchArgs = [
       '--hide-crash-restore-bubble',
@@ -311,16 +311,16 @@ export class BrowserManager {
         launchArgs.push(`--load-extension=${extensionPath}`);
       }
       // Write auth token for extension bootstrap (still required even when
-      // the extension is component-baked — it reads ~/.gstack/.auth.json at
+      // the extension is component-baked — it reads ~/.mstack/.auth.json at
       // startup to learn how to call the daemon).
-      // Write to ~/.gstack/.auth.json (not the extension dir, which may be read-only
+      // Write to ~/.mstack/.auth.json (not the extension dir, which may be read-only
       // in .app bundles and breaks codesigning).
       if (authToken) {
         const fs = require('fs');
         const path = require('path');
-        const gstackDir = path.join(process.env.HOME || '/tmp', '.gstack');
-        mkdirSecure(gstackDir);
-        const authFile = path.join(gstackDir, '.auth.json');
+        const mstackDir = path.join(process.env.HOME || '/tmp', '.mstack');
+        mkdirSecure(mstackDir);
+        const authFile = path.join(mstackDir, '.auth.json');
         try {
           writeSecureFile(authFile, JSON.stringify({ token: authToken, port: this.serverPort || 34567 }));
         } catch (err: any) {
@@ -343,12 +343,12 @@ export class BrowserManager {
     // (SIGKILL, hard crash) — the lockfiles point at a PID that may no longer
     // exist. Shutdown cleanup doesn't run on hard crashes, so we clean here
     // too. Safe under external coordination: gbd.lock for gbrowser,
-    // single-instance CLI check for gstack.
+    // single-instance CLI check for mstack.
     cleanSingletonLocks(userDataDir);
 
-    // Support custom Chromium binary via GSTACK_CHROMIUM_PATH env var.
+    // Support custom Chromium binary via MSTACK_CHROMIUM_PATH env var.
     // Used by GStack Browser.app to point at the bundled Chromium.
-    const executablePath = process.env.GSTACK_CHROMIUM_PATH || undefined;
+    const executablePath = process.env.MSTACK_CHROMIUM_PATH || undefined;
 
     // Rebrand Chromium → GStack Browser in macOS menu bar / Dock / Cmd+Tab.
     // Patch the Chromium .app's Info.plist so macOS shows our name.
@@ -370,7 +370,7 @@ export class BrowserManager {
         // Replace Chromium's Dock icon with ours (Chromium's process owns the Dock icon)
         const iconCandidates = [
           path.join(__dirname, '..', '..', 'scripts', 'app', 'icon.icns'),       // repo dev mode
-          path.join(process.env.HOME || '', '.claude', 'skills', 'gstack', 'scripts', 'app', 'icon.icns'), // global install
+          path.join(process.env.HOME || '', '.claude', 'skills', 'mstack', 'scripts', 'app', 'icon.icns'), // global install
         ];
         const iconSrc = iconCandidates.find(p => fs.existsSync(p));
         if (iconSrc) {
@@ -478,27 +478,27 @@ export class BrowserManager {
     // Extension's content script handles the floating pill
     const indicatorScript = () => {
       const injectIndicator = () => {
-        if (document.getElementById('gstack-ctrl')) return;
+        if (document.getElementById('mstack-ctrl')) return;
 
         const topLine = document.createElement('div');
-        topLine.id = 'gstack-ctrl';
+        topLine.id = 'mstack-ctrl';
         topLine.style.cssText = `
           position: fixed; top: 0; left: 0; right: 0; height: 2px;
           background: linear-gradient(90deg, #F59E0B, #FBBF24, #F59E0B);
           background-size: 200% 100%;
-          animation: gstack-shimmer 3s linear infinite;
+          animation: mstack-shimmer 3s linear infinite;
           pointer-events: none; z-index: 2147483647;
           opacity: 0.8;
         `;
 
         const style = document.createElement('style');
         style.textContent = `
-          @keyframes gstack-shimmer {
+          @keyframes mstack-shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
           }
           @media (prefers-reduced-motion: reduce) {
-            #gstack-ctrl { animation: none !important; }
+            #mstack-ctrl { animation: none !important; }
           }
         `;
 
@@ -1216,7 +1216,7 @@ export class BrowserManager {
       throw new Error(`viewport --scale: value must be a finite number, got ${scale}`);
     }
     if (scale < 1 || scale > 3) {
-      throw new Error(`viewport --scale: value must be between 1 and 3 (gstack policy cap), got ${scale}`);
+      throw new Error(`viewport --scale: value must be between 1 and 3 (mstack policy cap), got ${scale}`);
     }
     if (this.connectionMode === 'headed') {
       throw new Error('viewport --scale is not supported in headed mode — scale is controlled by the real browser window.');
@@ -1298,7 +1298,7 @@ export class BrowserManager {
         console.log('[browse] Handoff: extension not found — headed mode without side panel');
       }
 
-      const userDataDir = path.join(process.env.HOME || '/tmp', '.gstack', 'chromium-profile');
+      const userDataDir = path.join(process.env.HOME || '/tmp', '.mstack', 'chromium-profile');
       fs.mkdirSync(userDataDir, { recursive: true });
 
       newContext = await chromium.launchPersistentContext(userDataDir, {

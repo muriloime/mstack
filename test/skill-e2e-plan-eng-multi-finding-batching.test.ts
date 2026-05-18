@@ -38,7 +38,7 @@ const describeE2E = shouldRun ? describe : describe.skip;
 const N = 4;
 const FLOOR = N - 1; // 3 — agent must fire at least one AUQ per non-batched finding
 
-const PLAN_PATH = '/tmp/gstack-test-plan-eng-batching.md';
+const PLAN_PATH = '/tmp/mstack-test-plan-eng-batching.md';
 
 describeE2E('/plan-eng-review multi-finding batching regression (periodic)', () => {
   test(

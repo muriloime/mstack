@@ -319,8 +319,8 @@ describe('Rate limit + denial log wiring', () => {
   });
 });
 
-describe('E3: /welcome GSTACK_SLUG path traversal gate', () => {
-  test('/welcome validates GSTACK_SLUG against ^[a-z0-9_-]+$ before interpolating into path', () => {
+describe('E3: /welcome MSTACK_SLUG path traversal gate', () => {
+  test('/welcome validates MSTACK_SLUG against ^[a-z0-9_-]+$ before interpolating into path', () => {
     const welcomeBlock = sliceBetween(
       SERVER_SRC,
       "url.pathname === '/welcome'",

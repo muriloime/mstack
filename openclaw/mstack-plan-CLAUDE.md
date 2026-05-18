@@ -1,4 +1,4 @@
-# gstack-plan: Full Review Gauntlet
+# mstack-plan: Full Review Gauntlet
 
 Injected by the orchestrator when the user wants to plan a Claude Code project.
 Append to existing CLAUDE.md.
@@ -14,7 +14,7 @@ Append to existing CLAUDE.md.
    - Plan file path
    - One-paragraph summary of what was designed and the key decisions
    - List of accepted scope expansions (if any)
-   - Recommended next step (usually: spawn a new session with gstack-full to implement)
+   - Recommended next step (usually: spawn a new session with mstack-full to implement)
 
 Do not implement anything. This is planning only.
 The orchestrator will persist the plan link to its own memory/knowledge store.

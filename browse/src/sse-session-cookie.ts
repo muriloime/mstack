@@ -89,7 +89,7 @@ export function extractSseCookie(req: Request): string | null {
  *
  * Secure is intentionally omitted: the daemon binds to 127.0.0.1 over
  * plain HTTP, and setting Secure would prevent the browser from ever
- * sending the cookie back. If gstack ever ships over HTTPS, add Secure.
+ * sending the cookie back. If mstack ever ships over HTTPS, add Secure.
  */
 export function buildSseSetCookie(token: string): string {
   const maxAge = Math.floor(TTL_MS / 1000);

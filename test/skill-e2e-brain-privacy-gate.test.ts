@@ -9,7 +9,7 @@
  *     --fast --json succeeds)
  *
  * This test stages all three conditions (via env + a fake `gbrain` binary
- * on PATH), runs a cheap gstack skill through the Agent SDK, intercepts
+ * on PATH), runs a cheap mstack skill through the Agent SDK, intercepts
  * every tool use via canUseTool, and asserts: one of the AskUserQuestions
  * fired by the preamble is the privacy gate with its distinctive prose
  * and three options (full / artifacts-only / decline).
@@ -30,14 +30,14 @@ const shouldRun = !!process.env.EVALS && process.env.EVALS_TIER === 'periodic';
 const describeE2E = shouldRun ? describe : describe.skip;
 
 describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
-  test('gstack skill preamble fires the 3-option AskUserQuestion when gbrain is detected', async () => {
-    // Stage a fresh GSTACK_HOME with artifacts_sync_mode_prompted=false.
-    const gstackHome = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-gstack-'));
+  test('mstack skill preamble fires the 3-option AskUserQuestion when gbrain is detected', async () => {
+    // Stage a fresh MSTACK_HOME with artifacts_sync_mode_prompted=false.
+    const mstackHome = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-mstack-'));
     const fakeBinDir = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-bin-'));
 
     // Seed the config so the gate's condition passes.
     fs.writeFileSync(
-      path.join(gstackHome, 'config.yaml'),
+      path.join(mstackHome, 'config.yaml'),
       'artifacts_sync_mode: off\nartifacts_sync_mode_prompted: false\n',
       { mode: 0o600 }
     );
@@ -61,9 +61,9 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
 
     // Ambient env mutations — restored in finally so other tests in the file
     // don't inherit them.
-    const origGstackHome = process.env.GSTACK_HOME;
+    const origGstackHome = process.env.MSTACK_HOME;
     const origPath = process.env.PATH;
-    process.env.GSTACK_HOME = gstackHome;
+    process.env.MSTACK_HOME = mstackHome;
     process.env.PATH = `${fakeBinDir}:${process.env.PATH ?? '/usr/bin:/bin:/opt/homebrew/bin'}`;
 
     try {
@@ -82,7 +82,7 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
         systemPrompt: { type: 'preset', preset: 'claude_code' },
         userPrompt:
           `Read the skill file at ${learnSkill} and follow its instructions from the top, including every preamble directive. Execute every bash block. If any AskUserQuestion fires, present it.`,
-        workingDirectory: gstackHome,
+        workingDirectory: mstackHome,
         maxTurns: 10,
         allowedTools: ['Read', 'Grep', 'Glob', 'Bash'],
         // NOTE: do NOT pass `env:` here. When the Agent SDK gets an explicit
@@ -142,22 +142,22 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
       expect(privacyQuestions.length).toBe(1);
     } finally {
       // Restore ambient env before other tests.
-      if (origGstackHome === undefined) delete process.env.GSTACK_HOME;
-      else process.env.GSTACK_HOME = origGstackHome;
+      if (origGstackHome === undefined) delete process.env.MSTACK_HOME;
+      else process.env.MSTACK_HOME = origGstackHome;
       if (origPath === undefined) delete process.env.PATH;
       else process.env.PATH = origPath;
-      fs.rmSync(gstackHome, { recursive: true, force: true });
+      fs.rmSync(mstackHome, { recursive: true, force: true });
       fs.rmSync(fakeBinDir, { recursive: true, force: true });
     }
   }, 180_000);
 
   test('privacy gate does NOT fire when artifacts_sync_mode_prompted is already true', async () => {
     // Same staging, but prompted=true this time. Gate should be silent.
-    const gstackHome = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-off-'));
+    const mstackHome = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-off-'));
     const fakeBinDir = fs.mkdtempSync(path.join(os.tmpdir(), 'privacy-gate-off-bin-'));
 
     fs.writeFileSync(
-      path.join(gstackHome, 'config.yaml'),
+      path.join(mstackHome, 'config.yaml'),
       'artifacts_sync_mode: off\nartifacts_sync_mode_prompted: true\n',
       { mode: 0o600 }
     );
@@ -172,9 +172,9 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
     const binary = resolveClaudeBinary();
 
     // Ambient env mutations (see note on the first test).
-    const origGstackHome = process.env.GSTACK_HOME;
+    const origGstackHome = process.env.MSTACK_HOME;
     const origPath = process.env.PATH;
-    process.env.GSTACK_HOME = gstackHome;
+    process.env.MSTACK_HOME = mstackHome;
     process.env.PATH = `${fakeBinDir}:${process.env.PATH ?? '/usr/bin:/bin:/opt/homebrew/bin'}`;
 
     try {
@@ -182,7 +182,7 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
         systemPrompt: { type: 'preset', preset: 'claude_code' },
         userPrompt:
           'Run /learn with no arguments. Just report the learnings count.',
-        workingDirectory: gstackHome,
+        workingDirectory: mstackHome,
         maxTurns: 4,
         allowedTools: ['Read', 'Grep', 'Glob', 'Bash'],
         ...(binary ? { pathToClaudeCodeExecutable: binary } : {}),
@@ -216,11 +216,11 @@ describeE2E('gbrain-sync privacy gate fires once via preamble', () => {
       });
       expect(privacyQuestions.length).toBe(0);
     } finally {
-      if (origGstackHome === undefined) delete process.env.GSTACK_HOME;
-      else process.env.GSTACK_HOME = origGstackHome;
+      if (origGstackHome === undefined) delete process.env.MSTACK_HOME;
+      else process.env.MSTACK_HOME = origGstackHome;
       if (origPath === undefined) delete process.env.PATH;
       else process.env.PATH = origPath;
-      fs.rmSync(gstackHome, { recursive: true, force: true });
+      fs.rmSync(mstackHome, { recursive: true, force: true });
       fs.rmSync(fakeBinDir, { recursive: true, force: true });
     }
   }, 180_000);

@@ -217,7 +217,7 @@ describe('pair-agent flow end-to-end (HTTP only, no ngrok)', () => {
   // separate eventsource-based harness.
 
   test('/welcome regex gate: safe slug resolves; dangerous slug does not path-traverse', async () => {
-    // The regex gate lives in server.ts — we can't easily flip GSTACK_SLUG
+    // The regex gate lives in server.ts — we can't easily flip MSTACK_SLUG
     // on a running daemon, but we CAN verify the endpoint serves something
     // reasonable for the default 'unknown' slug (no crash, no 500).
     const resp = await fetch(`${daemon.baseUrl}/welcome`);

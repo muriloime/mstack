@@ -131,13 +131,13 @@ describe('Source-level guard: terminal-agent', () => {
     expect(wsHandler).toContain('validTokens.has');
   });
 
-  test('Sec-WebSocket-Protocol auth: strips gstack-pty. prefix and echoes back', () => {
+  test('Sec-WebSocket-Protocol auth: strips mstack-pty. prefix and echoes back', () => {
     const wsHandler = AGENT_SRC.slice(AGENT_SRC.indexOf("if (url.pathname === '/ws')"));
-    // Browsers send `Sec-WebSocket-Protocol: gstack-pty.<token>`. The agent
+    // Browsers send `Sec-WebSocket-Protocol: mstack-pty.<token>`. The agent
     // must strip the prefix before checking validTokens, AND echo the
     // protocol back in the upgrade response — without the echo, the
     // browser closes the connection immediately.
-    expect(wsHandler).toContain("'gstack-pty.'");
+    expect(wsHandler).toContain("'mstack-pty.'");
     expect(wsHandler).toContain('Sec-WebSocket-Protocol');
     expect(wsHandler).toContain('acceptedProtocol');
   });
@@ -189,7 +189,7 @@ describe('Source-level guard: terminal-agent', () => {
     expect(AGENT_SRC).toContain('function buildTabAwarenessHint');
     const hint = AGENT_SRC.slice(AGENT_SRC.indexOf('function buildTabAwarenessHint'));
     // The hint must mention the live state files and the fanout command —
-    // those are the two affordances that distinguish a gstack-PTY claude
+    // those are the two affordances that distinguish a mstack-PTY claude
     // from a plain `claude` session.
     expect(hint).toContain('tabs.json');
     expect(hint).toContain('active-tab.json');

@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
-# gstack-security-dashboard — community prompt-injection attack stats
+# mstack-security-dashboard — community prompt-injection attack stats
 #
 # Reads the `security` section of the community-pulse edge function response
 # (supabase/functions/community-pulse/index.ts). Shows aggregated attack
-# data across all gstack users on telemetry=community.
+# data across all mstack users on telemetry=community.
 #
 # Call signature:
-#   gstack-security-dashboard           # human-readable dashboard
-#   gstack-security-dashboard --json    # machine-readable (CI / scripts)
+#   mstack-security-dashboard           # human-readable dashboard
+#   mstack-security-dashboard --json    # machine-readable (CI / scripts)
 #
 # Env overrides (for testing):
-#   GSTACK_DIR                    — override auto-detected gstack root
-#   GSTACK_SUPABASE_URL           — override Supabase project URL
-#   GSTACK_SUPABASE_ANON_KEY     — override Supabase anon key
+#   MSTACK_DIR                    — override auto-detected mstack root
+#   MSTACK_SUPABASE_URL           — override Supabase project URL
+#   MSTACK_SUPABASE_ANON_KEY     — override Supabase anon key
 set -uo pipefail
 
-GSTACK_DIR="${GSTACK_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+MSTACK_DIR="${MSTACK_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 
 # Source Supabase config
-if [ -z "${GSTACK_SUPABASE_URL:-}" ] && [ -f "$GSTACK_DIR/supabase/config.sh" ]; then
-  . "$GSTACK_DIR/supabase/config.sh"
+if [ -z "${MSTACK_SUPABASE_URL:-}" ] && [ -f "$MSTACK_DIR/supabase/config.sh" ]; then
+  . "$MSTACK_DIR/supabase/config.sh"
 fi
-SUPABASE_URL="${GSTACK_SUPABASE_URL:-}"
-ANON_KEY="${GSTACK_SUPABASE_ANON_KEY:-}"
+SUPABASE_URL="${MSTACK_SUPABASE_URL:-}"
+ANON_KEY="${MSTACK_SUPABASE_ANON_KEY:-}"
 
 JSON_MODE=0
 [ "${1:-}" = "--json" ] && JSON_MODE=1
@@ -32,12 +32,12 @@ if [ -z "$SUPABASE_URL" ] || [ -z "$ANON_KEY" ]; then
     echo '{"error":"supabase_not_configured"}'
     exit 0
   fi
-  echo "gstack security dashboard"
+  echo "mstack security dashboard"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  echo "Supabase not configured. Local log at ~/.gstack/security/attempts.jsonl"
+  echo "Supabase not configured. Local log at ~/.mstack/security/attempts.jsonl"
   echo "still captures every attempt — tail it with:"
-  echo "  cat ~/.gstack/security/attempts.jsonl | tail -20"
+  echo "  cat ~/.mstack/security/attempts.jsonl | tail -20"
   exit 0
 fi
 
@@ -117,5 +117,5 @@ if [ -n "$VERDICTS" ] && [ "$VERDICTS" != "[]" ]; then
   echo ""
 fi
 
-echo "Your local log: ~/.gstack/security/attempts.jsonl"
-echo "Your telemetry mode: $(${GSTACK_DIR}/bin/gstack-config get telemetry 2>/dev/null || echo unknown)"
+echo "Your local log: ~/.mstack/security/attempts.jsonl"
+echo "Your telemetry mode: $(${MSTACK_DIR}/bin/mstack-config get telemetry 2>/dev/null || echo unknown)"

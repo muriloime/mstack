@@ -297,7 +297,7 @@ describe("Cross-skill path consistency", () => {
       const hasBoth =
         (content.includes("per-project") && content.includes("global")) ||
         (content.includes("$REMOTE_SLUG/greptile-history") &&
-          content.includes("~/.gstack/greptile-history"));
+          content.includes("~/.mstack/greptile-history"));
 
       expect(hasBoth).toBe(true);
     }
@@ -309,7 +309,7 @@ describe("Cross-skill path consistency", () => {
       "utf-8",
     );
     expect(content).toContain("$REMOTE_SLUG/greptile-history.md");
-    expect(content).toContain("~/.gstack/greptile-history.md");
+    expect(content).toContain("~/.mstack/greptile-history.md");
   });
 
   test("retro/SKILL.md reads global greptile-history (not per-project)", () => {
@@ -317,7 +317,7 @@ describe("Cross-skill path consistency", () => {
       path.join(ROOT, "retro", "SKILL.md"),
       "utf-8",
     );
-    expect(content).toContain("~/.gstack/greptile-history.md");
+    expect(content).toContain("~/.mstack/greptile-history.md");
     // Should NOT reference per-project path for reads
     expect(content).not.toContain("$REMOTE_SLUG/greptile-history.md");
   });
@@ -416,7 +416,7 @@ describe("QA skill structure validation", () => {
     expect(qaContent).toContain("qa-report-");
     expect(qaContent).toContain("baseline.json");
     expect(qaContent).toContain("screenshots/");
-    expect(qaContent).toContain(".gstack/qa-reports/");
+    expect(qaContent).toContain(".mstack/qa-reports/");
   });
 });
 
@@ -673,7 +673,7 @@ describe("office-hours skill structure", () => {
 
   // YC founder discovery engine
   test("contains YC apply CTA with ref tracking", () => {
-    expect(content).toContain("ycombinator.com/apply?ref=gstack");
+    expect(content).toContain("ycombinator.com/apply?ref=mstack");
   });
 
   test('contains "What I noticed" design doc section', () => {
@@ -1012,10 +1012,10 @@ describe("CEO review mode validation", () => {
   });
 });
 
-// --- gstack-slug helper ---
+// --- mstack-slug helper ---
 
-describe("gstack-slug", () => {
-  const SLUG_BIN = path.join(ROOT, "bin", "gstack-slug");
+describe("mstack-slug", () => {
+  const SLUG_BIN = path.join(ROOT, "bin", "mstack-slug");
 
   test("binary exists and is executable", () => {
     expect(fs.existsSync(SLUG_BIN)).toBe(true);
@@ -1086,7 +1086,7 @@ describe("gstack-slug", () => {
       [
         "bash",
         "-c",
-        'set -euo pipefail; eval "$(./bin/gstack-slug 2>/dev/null)"; echo "SLUG=$SLUG"; echo "BRANCH=$BRANCH"',
+        'set -euo pipefail; eval "$(./bin/mstack-slug 2>/dev/null)"; echo "SLUG=$SLUG"; echo "BRANCH=$BRANCH"',
       ],
       { cwd: ROOT, stdout: "pipe", stderr: "pipe" },
     );
@@ -1096,14 +1096,14 @@ describe("gstack-slug", () => {
     expect(output).toMatch(/^BRANCH=.+/m);
   });
 
-  test("no templates or bin scripts use source process substitution for gstack-slug", () => {
+  test("no templates or bin scripts use source process substitution for mstack-slug", () => {
     const result = Bun.spawnSync(
       [
         "grep",
         "-r",
-        "source <(.*gstack-slug",
+        "source <(.*mstack-slug",
         "--include=*.tmpl",
-        "--include=gstack-review-*",
+        "--include=mstack-review-*",
         ".",
       ],
       { cwd: ROOT, stdout: "pipe", stderr: "pipe" },
@@ -1216,7 +1216,7 @@ describe("Phase 8e.5 regression test generation", () => {
     const content = fs.readFileSync(path.join(ROOT, "qa", "SKILL.md"), "utf-8");
     expect(content).toContain("// Regression: ISSUE-NNN");
     expect(content).toContain("// Found by /qa on");
-    expect(content).toContain("// Report: .gstack/qa-reports/");
+    expect(content).toContain("// Report: .mstack/qa-reports/");
   });
 
   test("regression test uses auto-incrementing names", () => {
@@ -1307,7 +1307,7 @@ describe("QA report template", () => {
 
 describe("Skill trigger phrases", () => {
   // Skills that must have "Use when" trigger phrases in their description.
-  // Excluded: root gstack (browser tool), gstack-upgrade (gstack-specific),
+  // Excluded: root mstack (browser tool), mstack-upgrade (mstack-specific),
   // humanizer (text tool)
   const SKILLS_REQUIRING_TRIGGERS = [
     "qa",
@@ -1488,7 +1488,7 @@ describe("Repo mode preamble validation", () => {
   test("generated SKILL.md preamble contains REPO_MODE output", () => {
     const content = fs.readFileSync(path.join(ROOT, "SKILL.md"), "utf-8");
     expect(content).toContain("REPO_MODE:");
-    expect(content).toContain("gstack-repo-mode");
+    expect(content).toContain("mstack-repo-mode");
   });
 
   test("tier 3+ skills contain See Something Say Something section", () => {
@@ -1600,7 +1600,7 @@ describe("no compiled binaries in git", () => {
 
 // ─── Browser-skills validation ──────────────────────────────────
 //
-// Browser-skills are bundled in <gstack-root>/browser-skills/<name>/. Each
+// Browser-skills are bundled in <mstack-root>/browser-skills/<name>/. Each
 // must have a SKILL.md whose frontmatter satisfies the contract enforced by
 // browse/src/browser-skills.ts:parseSkillFile (host required, args + triggers
 // parseable as the right shape). This test catches malformed bundled skills

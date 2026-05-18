@@ -1,16 +1,16 @@
 /**
- * gstack-memory-helpers — shared helpers for the V1 memory ingest + retrieval pipeline.
+ * mstack-memory-helpers — shared helpers for the V1 memory ingest + retrieval pipeline.
  *
  * Imported by:
- *   - bin/gstack-memory-ingest.ts (Lane A)
- *   - bin/gstack-gbrain-sync.ts   (Lane B)
+ *   - bin/mstack-memory-ingest.ts (Lane A)
+ *   - bin/mstack-gbrain-sync.ts   (Lane B)
  *   - bin/gstack-brain-context-load.ts (Lane C)
  *   - scripts/gen-skill-docs.ts (manifest validation)
  *
  * Design refs in the plan:
  *   §"Eng review additions" — DRY refactor (Section 1A)
  *   §"V1 final scope clarification" — schema_version: 1 standardization (Section 2A)
- *   ED1 — engine-tier cache lives in ~/.gstack/.gbrain-engine-cache.json (60s TTL)
+ *   ED1 — engine-tier cache lives in ~/.mstack/.gbrain-engine-cache.json (60s TTL)
  *
  * NOTE: secretScanFile() currently shells out to `gitleaks` from PATH; the vendored
  * binary install is part of Lane E (setup-gbrain). When gitleaks is missing, the
@@ -128,7 +128,7 @@ function gitleaksAvailable(): boolean {
     _gitleaksAvailability = false;
     // Only warn once per process — Lane E will vendor the binary.
     process.stderr.write(
-      "[gstack-memory-helpers] gitleaks not in PATH; secret scanning disabled. " +
+      "[mstack-memory-helpers] gitleaks not in PATH; secret scanning disabled. " +
       "Run /setup-gbrain to install (or `brew install gitleaks`).\n"
     );
   }
@@ -194,21 +194,21 @@ function redactMatch(s: string): string {
 
 const ENGINE_CACHE_TTL_MS = 60 * 1000;
 
-function gstackHome(): string {
-  return process.env.GSTACK_HOME || join(homedir(), ".gstack");
+function mstackHome(): string {
+  return process.env.MSTACK_HOME || join(homedir(), ".mstack");
 }
 
 function engineCachePath(): string {
-  return join(gstackHome(), ".gbrain-engine-cache.json");
+  return join(mstackHome(), ".gbrain-engine-cache.json");
 }
 
 function errorLogPath(): string {
-  return join(gstackHome(), ".gbrain-errors.jsonl");
+  return join(mstackHome(), ".gbrain-errors.jsonl");
 }
 
 /**
  * Detect which gbrain engine is active (PGLite vs Supabase) and cache the
- * answer for 60s in ~/.gstack/.gbrain-engine-cache.json. Caching avoids
+ * answer for 60s in ~/.mstack/.gbrain-engine-cache.json. Caching avoids
  * fork+exec'ing `gbrain doctor --json` on every skill start.
  *
  * Per ED1 (state files local-only): this cache is gitignored from the brain
@@ -235,7 +235,7 @@ export function detectEngineTier(): EngineDetect {
     mkdirSync(dirname(engineCachePath()), { recursive: true });
     writeFileSync(
       engineCachePath(),
-      JSON.stringify({ ...fresh, last_writer: "gstack-memory-helpers.detectEngineTier" }, null, 2),
+      JSON.stringify({ ...fresh, last_writer: "mstack-memory-helpers.detectEngineTier" }, null, 2),
       "utf-8"
     );
   } catch {
@@ -253,7 +253,7 @@ function gbrainConfigPath(): string {
   return join(root, "config.json");
 }
 
-// Best-effort JSONL append to ~/.gstack/.gbrain-errors.jsonl. Never throws.
+// Best-effort JSONL append to ~/.mstack/.gbrain-errors.jsonl. Never throws.
 function logGbrainError(kind: string, detail: string): void {
   try {
     const path = errorLogPath();
@@ -416,11 +416,11 @@ function extractGbrainBlock(frontmatter: string): GbrainManifest | null {
 
 // ── Public: withErrorContext ──────────────────────────────────────────────
 
-const ERROR_LOG_PATH = join(gstackHome(), ".gbrain-errors.jsonl");
+const ERROR_LOG_PATH = join(mstackHome(), ".gbrain-errors.jsonl");
 
 /**
  * Wrap an op with structured error logging. Logs success/failure + duration
- * to ~/.gstack/.gbrain-errors.jsonl for forensic debugging. Replaces ad-hoc
+ * to ~/.mstack/.gbrain-errors.jsonl for forensic debugging. Replaces ad-hoc
  * try/catch sites across the three Bun helpers (Section 2B).
  *
  * On error: the error is RE-THROWN after logging — caller still owns flow.

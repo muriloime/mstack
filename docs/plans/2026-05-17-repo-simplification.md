@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Strip gstack down to its core novel skills, removing telemetry/data-collection, update logic, and unused skill directories while keeping infrastructure that the surviving skills depend on.
+**Goal:** Strip mstack down to its core novel skills, removing telemetry/data-collection, update logic, and unused skill directories while keeping infrastructure that the surviving skills depend on.
 
 **Architecture:** Delete directories wholesale, then surgically remove telemetry/update-check code from the preamble generator and the `setup` script. The test suite will need corresponding deletions. The `gen:skill-docs` pipeline and the `setup` script are the two main "wiring" files to clean up.
 
@@ -75,11 +75,11 @@ Skill directories:
 - `extension/` (Chrome extension)
 - `setup-gbrain/`
 - `sync-gbrain/`
-- `open-gstack-browser/`
+- `open-mstack-browser/`
 - `connect-chrome` (symlink)
 - `setup-browser-cookies/`
 - `setup-deploy/`
-- `gstack-upgrade/`
+- `mstack-upgrade/`
 - `health/`
 - `model-overlays/`
 - `supabase/`
@@ -89,50 +89,50 @@ Skill directories:
 
 Data-collection bin scripts (in `bin/`):
 
-- `gstack-telemetry-log`
-- `gstack-telemetry-sync`
-- `gstack-update-check`
-- `gstack-session-update`
-- `gstack-analytics`
-- `gstack-timeline-log`
-- `gstack-timeline-read`
-- `gstack-question-log`
-- `gstack-question-preference`
-- `gstack-review-log`
-- `gstack-review-read`
-- `gstack-learnings-log`
-- `gstack-learnings-search`
-- `gstack-specialist-stats`
-- `gstack-taste-update`
-- `gstack-builder-profile`
-- `gstack-developer-profile`
-- `gstack-community-dashboard`
-- `gstack-artifacts-init`
-- `gstack-artifacts-url`
+- `mstack-telemetry-log`
+- `mstack-telemetry-sync`
+- `mstack-update-check`
+- `mstack-session-update`
+- `mstack-analytics`
+- `mstack-timeline-log`
+- `mstack-timeline-read`
+- `mstack-question-log`
+- `mstack-question-preference`
+- `mstack-review-log`
+- `mstack-review-read`
+- `mstack-learnings-log`
+- `mstack-learnings-search`
+- `mstack-specialist-stats`
+- `mstack-taste-update`
+- `mstack-builder-profile`
+- `mstack-developer-profile`
+- `mstack-community-dashboard`
+- `mstack-artifacts-init`
+- `mstack-artifacts-url`
 - `gstack-brain-consumer`
 - `gstack-brain-enqueue`
 - `gstack-brain-reader` (symlink)
 - `gstack-brain-restore`
 - `gstack-brain-sync`
 - `gstack-brain-uninstall`
-- `gstack-gbrain-supabase-provision`
-- `gstack-gbrain-supabase-verify`
-- `gstack-gbrain-mcp-verify`
-- `gstack-gbrain-repo-policy`
-- `gstack-gbrain-source-wireup`
-- `gstack-gbrain-detect`
-- `gstack-gbrain-install`
-- `gstack-gbrain-lib.sh`
-- `gstack-gbrain-sync.ts`
-- `gstack-memory-ingest.ts`
+- `mstack-gbrain-supabase-provision`
+- `mstack-gbrain-supabase-verify`
+- `mstack-gbrain-mcp-verify`
+- `mstack-gbrain-repo-policy`
+- `mstack-gbrain-source-wireup`
+- `mstack-gbrain-detect`
+- `mstack-gbrain-install`
+- `mstack-gbrain-lib.sh`
+- `mstack-gbrain-sync.ts`
+- `mstack-memory-ingest.ts`
 - `gstack-brain-context-load.ts`
-- `gstack-gbrain-sync.ts`
-- `gstack-codex-probe`
-- `gstack-extension`
-- `gstack-settings-hook`
-- `gstack-team-init`
-- `gstack-model-benchmark`
-- `gstack-uninstall` ← keep this one (useful)
+- `mstack-gbrain-sync.ts`
+- `mstack-codex-probe`
+- `mstack-extension`
+- `mstack-settings-hook`
+- `mstack-team-init`
+- `mstack-model-benchmark`
+- `mstack-uninstall` ← keep this one (useful)
 
 Scripts to delete from `scripts/`:
 
@@ -165,9 +165,9 @@ Test files to delete (for removed features):
 - `test/brain-sync.test.ts`
 - `test/gbrain-*.test.ts` (all gbrain tests)
 - `test/gstack-brain-*.test.ts`
-- `test/gstack-gbrain-*.test.ts`
-- `test/gstack-developer-profile.test.ts`
-- `test/gstack-artifacts-*.test.ts`
+- `test/mstack-gbrain-*.test.ts`
+- `test/mstack-developer-profile.test.ts`
+- `test/mstack-artifacts-*.test.ts`
 - `test/artifacts-init-migration.test.ts`
 - `test/benchmark-*.test.ts`
 - `test/codex-e2e*.test.ts`
@@ -195,8 +195,8 @@ Test files to delete (for removed features):
 - Delete: `benchmark/`, `benchmark-models/`, `canary/`, `pair-agent/`, `freeze/`, `unfreeze/`
 - Delete: `land-and-deploy/`, `ship/`, `codex/`, `careful/`, `learn/`
 - Delete: `context-save/`, `context-restore/`, `skillify/`, `devex-review/`, `plan-devex-review/`
-- Delete: `extension/`, `setup-gbrain/`, `sync-gbrain/`, `open-gstack-browser/`
-- Delete: `setup-browser-cookies/`, `setup-deploy/`, `gstack-upgrade/`, `health/`
+- Delete: `extension/`, `setup-gbrain/`, `sync-gbrain/`, `open-mstack-browser/`
+- Delete: `setup-browser-cookies/`, `setup-deploy/`, `mstack-upgrade/`, `health/`
 - Delete: `model-overlays/`, `supabase/`, `browser-skills/`, `make-pdf/`, `qa-only/`
 - Delete: `connect-chrome` (symlink)
 
@@ -215,8 +215,8 @@ cd /home/murilo/code/zzug/mstack
 rm -rf benchmark benchmark-models canary pair-agent freeze unfreeze
 rm -rf land-and-deploy ship codex careful learn
 rm -rf context-save context-restore skillify devex-review plan-devex-review
-rm -rf extension setup-gbrain sync-gbrain open-gstack-browser
-rm -rf setup-browser-cookies setup-deploy gstack-upgrade health
+rm -rf extension setup-gbrain sync-gbrain open-mstack-browser
+rm -rf setup-browser-cookies setup-deploy mstack-upgrade health
 rm -rf model-overlays supabase browser-skills make-pdf qa-only
 rm -f connect-chrome
 ```
@@ -254,28 +254,28 @@ ls /home/murilo/code/zzug/mstack/bin/ | sort
 
 ```bash
 cd /home/murilo/code/zzug/mstack/bin
-rm -f gstack-telemetry-log gstack-telemetry-sync
-rm -f gstack-update-check gstack-session-update
-rm -f gstack-analytics
-rm -f gstack-timeline-log gstack-timeline-read
-rm -f gstack-question-log gstack-question-preference
-rm -f gstack-review-log gstack-review-read
-rm -f gstack-learnings-log gstack-learnings-search
-rm -f gstack-specialist-stats
-rm -f gstack-taste-update
-rm -f gstack-builder-profile gstack-developer-profile
-rm -f gstack-community-dashboard
-rm -f gstack-artifacts-init gstack-artifacts-url
+rm -f mstack-telemetry-log mstack-telemetry-sync
+rm -f mstack-update-check mstack-session-update
+rm -f mstack-analytics
+rm -f mstack-timeline-log mstack-timeline-read
+rm -f mstack-question-log mstack-question-preference
+rm -f mstack-review-log mstack-review-read
+rm -f mstack-learnings-log mstack-learnings-search
+rm -f mstack-specialist-stats
+rm -f mstack-taste-update
+rm -f mstack-builder-profile mstack-developer-profile
+rm -f mstack-community-dashboard
+rm -f mstack-artifacts-init mstack-artifacts-url
 rm -f gstack-brain-consumer gstack-brain-enqueue
 rm -f gstack-brain-reader gstack-brain-restore gstack-brain-sync gstack-brain-uninstall
-rm -f gstack-gbrain-supabase-provision gstack-gbrain-supabase-verify
-rm -f gstack-gbrain-mcp-verify gstack-gbrain-repo-policy
-rm -f gstack-gbrain-source-wireup gstack-gbrain-detect gstack-gbrain-install
-rm -f gstack-gbrain-lib.sh
-rm -f gstack-gbrain-sync.ts gstack-memory-ingest.ts gstack-brain-context-load.ts
-rm -f gstack-codex-probe
-rm -f gstack-extension gstack-settings-hook gstack-team-init
-rm -f gstack-model-benchmark
+rm -f mstack-gbrain-supabase-provision mstack-gbrain-supabase-verify
+rm -f mstack-gbrain-mcp-verify mstack-gbrain-repo-policy
+rm -f mstack-gbrain-source-wireup mstack-gbrain-detect mstack-gbrain-install
+rm -f mstack-gbrain-lib.sh
+rm -f mstack-gbrain-sync.ts mstack-memory-ingest.ts gstack-brain-context-load.ts
+rm -f mstack-codex-probe
+rm -f mstack-extension mstack-settings-hook mstack-team-init
+rm -f mstack-model-benchmark
 ```
 
 **Step 3: Also delete the TypeScript source scripts**
@@ -300,7 +300,7 @@ rm -f learnings.ts make-pdf.ts gbrain.ts codex-helpers.ts
 ls /home/murilo/code/zzug/mstack/bin/ | sort
 ```
 
-Expected survivors: `gstack-config`, `gstack-paths`, `gstack-slug`, `gstack-repo-mode`, `gstack-platform-detect`, `gstack-diff-scope`, `gstack-next-version`, `gstack-open-url`, `gstack-relink`, `gstack-patch-names`, `gstack-global-discover`, `gstack-global-discover.ts`, `dev-setup`, `dev-teardown`, `chrome-cdp`, and others used by surviving skills.
+Expected survivors: `mstack-config`, `mstack-paths`, `mstack-slug`, `mstack-repo-mode`, `mstack-platform-detect`, `mstack-diff-scope`, `mstack-next-version`, `mstack-open-url`, `mstack-relink`, `mstack-patch-names`, `mstack-global-discover`, `mstack-global-discover.ts`, `dev-setup`, `dev-teardown`, `chrome-cdp`, and others used by surviving skills.
 
 **Step 6: Commit**
 
@@ -330,10 +330,10 @@ rm -f gbrain-local-status.test.ts gbrain-repo-policy.test.ts
 rm -f gbrain-sources.test.ts gbrain-supabase-provision.test.ts
 rm -f gbrain-sync-skip.test.ts
 rm -f gstack-brain-context-load.test.ts
-rm -f gstack-developer-profile.test.ts
-rm -f gstack-gbrain-detect-mcp-mode.test.ts gstack-gbrain-mcp-verify.test.ts
-rm -f gstack-gbrain-source-wireup.test.ts gstack-gbrain-sync.test.ts
-rm -f gstack-artifacts-init.test.ts gstack-artifacts-url.test.ts
+rm -f mstack-developer-profile.test.ts
+rm -f mstack-gbrain-detect-mcp-mode.test.ts mstack-gbrain-mcp-verify.test.ts
+rm -f mstack-gbrain-source-wireup.test.ts mstack-gbrain-sync.test.ts
+rm -f mstack-artifacts-init.test.ts mstack-artifacts-url.test.ts
 rm -f artifacts-init-migration.test.ts
 rm -f benchmark-cli.test.ts benchmark-runner.test.ts
 rm -f codex-e2e-plan-format.test.ts codex-e2e.test.ts
@@ -394,13 +394,13 @@ cat /home/murilo/code/zzug/mstack/scripts/resolvers/preamble/generate-preamble-b
 
 Remove these sections from the generated bash string:
 
-1. The `gstack-update-check` call and its output (`_UPD=...`)
+1. The `mstack-update-check` call and its output (`_UPD=...`)
 2. The `_TEL` / `_TEL_PROMPTED` / `_TEL_START` / `_SESSION_ID` telemetry var setup
-3. The `mkdir -p ~/.gstack/analytics` line
+3. The `mkdir -p ~/.mstack/analytics` line
 4. The `if [ "$_TEL" != "off" ]` block writing to `skill-usage.jsonl`
-5. The `.pending-*` loop that calls `gstack-telemetry-log`
-6. The `_LEARN_FILE` / `_LEARN_COUNT` / `gstack-learnings-search` block
-7. The `gstack-timeline-log` background fork
+5. The `.pending-*` loop that calls `mstack-telemetry-log`
+6. The `_LEARN_FILE` / `_LEARN_COUNT` / `mstack-learnings-search` block
+7. The `mstack-timeline-log` background fork
 8. The `_PROACTIVE` / `_PROACTIVE_PROMPTED` session vars (minor — up to you)
 9. The gbrain doctor health-check block (inside `ctx.host === 'gbrain'...`)
 
@@ -409,7 +409,7 @@ Keep:
 - `_BRANCH`, `echo "BRANCH: $_BRANCH"`
 - `_SKILL_PREFIX`, `REPO_MODE`, `_LAKE_SEEN`, `_EXPLAIN_LEVEL`, `_QUESTION_TUNING`
 - `_CHECKPOINT_MODE`, `_CHECKPOINT_PUSH`
-- The `gstack-slug` eval
+- The `mstack-slug` eval
 
 After editing, the generated preamble should just: detect branch, slug, repo-mode, config vars, and print them.
 
@@ -424,7 +424,7 @@ cat /home/murilo/code/zzug/mstack/scripts/resolvers/preamble/generate-completion
 Remove from the generated bash:
 
 1. The `skill-usage.jsonl` append
-2. The `gstack-telemetry-log` call block
+2. The `mstack-telemetry-log` call block
 3. Any `_TEL` condition checks
 
 Keep the visual completion banner and duration output.
@@ -478,7 +478,7 @@ cat /home/murilo/code/zzug/mstack/scripts/gen-skill-docs.ts
 **Step 2: Remove references to deleted skills**
 
 In `gen-skill-docs.ts`, there is likely a list of skill directories to generate docs for. Remove entries for all deleted skills:
-`benchmark`, `benchmark-models`, `canary`, `pair-agent`, `freeze`, `unfreeze`, `land-and-deploy`, `ship`, `codex`, `careful`, `learn`, `context-save`, `context-restore`, `skillify`, `devex-review`, `plan-devex-review`, `extension`, `setup-gbrain`, `sync-gbrain`, `open-gstack-browser`, `setup-browser-cookies`, `setup-deploy`, `gstack-upgrade`, `health`, `model-overlays`, `make-pdf`, `qa-only`.
+`benchmark`, `benchmark-models`, `canary`, `pair-agent`, `freeze`, `unfreeze`, `land-and-deploy`, `ship`, `codex`, `careful`, `learn`, `context-save`, `context-restore`, `skillify`, `devex-review`, `plan-devex-review`, `extension`, `setup-gbrain`, `sync-gbrain`, `open-mstack-browser`, `setup-browser-cookies`, `setup-deploy`, `mstack-upgrade`, `health`, `model-overlays`, `make-pdf`, `qa-only`.
 
 Also remove any resolver imports for `learnings`, `gbrain`, `make-pdf`, `codex-helpers`.
 
@@ -501,7 +501,7 @@ Expected: runs without errors. Any "file not found" errors for deleted skill tem
 **Step 5: Verify SKILL.md content**
 
 ```bash
-grep -n "telemetry\|update-check\|gstack-telemetry\|skill-usage.jsonl" /home/murilo/code/zzug/mstack/SKILL.md | head -20
+grep -n "telemetry\|update-check\|mstack-telemetry\|skill-usage.jsonl" /home/murilo/code/zzug/mstack/SKILL.md | head -20
 ```
 
 These should not appear (or appear only in explanatory text, not in bash blocks).
@@ -530,11 +530,11 @@ cat /home/murilo/code/zzug/mstack/setup
 
 **Step 2: Remove from setup**
 
-1. All blocks that symlink/install deleted skill directories (benchmark, canary, pair-agent, freeze/unfreeze, land-and-deploy, ship, codex, careful, learn, context-save/restore, skillify, devex-review, plan-devex-review, extension, setup-gbrain, sync-gbrain, open-gstack-browser, setup-browser-cookies, setup-deploy, gstack-upgrade, health, model-overlays, make-pdf, qa-only, connect-chrome alias)
-2. The `gstack-session-update` team-mode hook registration block (lines ~1069+)
-3. The `gstack-settings-hook add/remove` calls
-4. Any block that registers `gstack-update-check`, `gstack-telemetry-*` or references `auto_upgrade` / `team_mode` config keys
-5. The welcome/legacy-cleanup block referring to `/gstack-upgrade`
+1. All blocks that symlink/install deleted skill directories (benchmark, canary, pair-agent, freeze/unfreeze, land-and-deploy, ship, codex, careful, learn, context-save/restore, skillify, devex-review, plan-devex-review, extension, setup-gbrain, sync-gbrain, open-mstack-browser, setup-browser-cookies, setup-deploy, mstack-upgrade, health, model-overlays, make-pdf, qa-only, connect-chrome alias)
+2. The `mstack-session-update` team-mode hook registration block (lines ~1069+)
+3. The `mstack-settings-hook add/remove` calls
+4. Any block that registers `mstack-update-check`, `mstack-telemetry-*` or references `auto_upgrade` / `team_mode` config keys
+5. The welcome/legacy-cleanup block referring to `/mstack-upgrade`
 
 Keep all symlink logic for surviving skills and core bin scripts.
 
@@ -626,7 +626,7 @@ Common causes:
 **Step 3: Check for stray telemetry references**
 
 ```bash
-grep -r "gstack-telemetry\|skill-usage.jsonl\|gstack-update-check\|gstack-timeline\|gstack-learnings\|gstack-analytics" /home/murilo/code/zzug/mstack/scripts/ 2>/dev/null | grep -v ".tmpl" | grep -v "node_modules"
+grep -r "mstack-telemetry\|skill-usage.jsonl\|mstack-update-check\|mstack-timeline\|mstack-learnings\|mstack-analytics" /home/murilo/code/zzug/mstack/scripts/ 2>/dev/null | grep -v ".tmpl" | grep -v "node_modules"
 ```
 
 Expected: no output (all references removed).
@@ -656,10 +656,10 @@ cat /home/murilo/code/zzug/mstack/CLAUDE.md
 
 - Remove entries for deleted skill directories from the `## Project structure` tree
 - Remove the `## Compiled binaries` section's reference to `make-pdf/dist/pdf`
-- Remove the `gstack-upgrade` migration section references
+- Remove the `mstack-upgrade` migration section references
 - Remove the `pair-agent` / extension sidebar architecture sections (big blocks — they're irrelevant without the extension)
 - Remove the `## Publishing native OpenClaw skills to ClawHub` section if openclaw is now unused
-- Remove the `## GSTACK_* env-shim for Conductor` section if it only applies to deleted conductors
+- Remove the `## MSTACK_* env-shim for Conductor` section if it only applies to deleted conductors
 
 **Step 3: Commit**
 
@@ -685,7 +685,7 @@ bun test browse/test/ test/ --ignore 'test/skill-e2e-*.test.ts' --ignore test/sk
 bun run gen:skill-docs
 
 # 4. No telemetry refs in generated SKILL.md
-grep -r "telemetry\|skill-usage.jsonl\|gstack-update-check" office-hours/SKILL.md plan-ceo-review/SKILL.md investigate/SKILL.md
+grep -r "telemetry\|skill-usage.jsonl\|mstack-update-check" office-hours/SKILL.md plan-ceo-review/SKILL.md investigate/SKILL.md
 
 # 5. Setup script syntax is valid
 bash -n setup && echo "OK"

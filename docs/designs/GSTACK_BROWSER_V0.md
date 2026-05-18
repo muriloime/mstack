@@ -21,10 +21,10 @@ for text editors, GStack Browser does for the browser.
 
 ## What It Is Today (Phase 1a, shipped)
 
-A double-clickable macOS .app that wraps Playwright's Chromium with the gstack
+A double-clickable macOS .app that wraps Playwright's Chromium with the mstack
 sidebar extension baked in. You open it and Claude Code can see your screen,
 navigate pages, fill forms, take screenshots, inspect CSS, clean up overlays,
-and run any gstack skill. All without touching a terminal.
+and run any mstack skill. All without touching a terminal.
 
 ```
 GStack Browser.app (389MB, 189MB DMG)
@@ -186,7 +186,7 @@ and the other watches the AI fix things in real-time.
 
 ### 6. Skills as Browser Capabilities
 
-Every gstack skill becomes a browser capability.
+Every mstack skill becomes a browser capability.
 
 | Skill | Browser Capability |
 |-------|-------------------|
@@ -270,7 +270,7 @@ Synthetic monitoring with AI judgment. Not just "did the page return 200" but
   +---------┴-----------+    +-----------┴-----------+
   |  Browse Server      |    |  Sidebar Agent        |
   |  (HTTP + SSE)       |    |  (claude -p wrapper)  |
-  |  :34567             |    |  Runs gstack skills   |
+  |  :34567             |    |  Runs mstack skills   |
   |                     |    |  Per-tab isolation     |
   |  Commands:          |    |                       |
   |  goto, click, fill  |    |  Future: BoomLooper   |
@@ -317,7 +317,7 @@ From DESIGN.md:
 |-----------|--------|-------|
 | .app bundle | **SHIPPED** | 389MB, launches in ~5s |
 | DMG packaging | **SHIPPED** | 189MB compressed |
-| `GSTACK_CHROMIUM_PATH` | **SHIPPED** | Custom Chromium binary support |
+| `MSTACK_CHROMIUM_PATH` | **SHIPPED** | Custom Chromium binary support |
 | `BROWSE_EXTENSIONS_DIR` | **SHIPPED** | Extension path override |
 | Auth via `/health` | **SHIPPED** | Replaces .auth.json file approach, auto-refreshes on server restart |
 | Build script | **SHIPPED** | `scripts/build-app.sh` |

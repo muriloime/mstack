@@ -1,8 +1,8 @@
 /**
- * Tests for bin/gstack-config bash script.
+ * Tests for bin/mstack-config bash script.
  *
  * Uses Bun.spawnSync to invoke the script with temp dirs and
- * GSTACK_STATE_DIR env override for full isolation.
+ * MSTACK_STATE_DIR env override for full isolation.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -10,7 +10,7 @@ import { mkdtempSync, writeFileSync, rmSync, readFileSync, existsSync } from 'fs
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-const SCRIPT = join(import.meta.dir, '..', '..', 'bin', 'gstack-config');
+const SCRIPT = join(import.meta.dir, '..', '..', 'bin', 'mstack-config');
 
 let stateDir: string;
 
@@ -18,7 +18,7 @@ function run(args: string[] = [], extraEnv: Record<string, string> = {}) {
   const result = Bun.spawnSync(['bash', SCRIPT, ...args], {
     env: {
       ...process.env,
-      GSTACK_STATE_DIR: stateDir,
+      MSTACK_STATE_DIR: stateDir,
       ...extraEnv,
     },
     stdout: 'pipe',
@@ -32,14 +32,14 @@ function run(args: string[] = [], extraEnv: Record<string, string> = {}) {
 }
 
 beforeEach(() => {
-  stateDir = mkdtempSync(join(tmpdir(), 'gstack-config-test-'));
+  stateDir = mkdtempSync(join(tmpdir(), 'mstack-config-test-'));
 });
 
 afterEach(() => {
   rmSync(stateDir, { recursive: true, force: true });
 });
 
-describe('gstack-config', () => {
+describe('mstack-config', () => {
   // ─── get ──────────────────────────────────────────────────
   test('get on missing file returns empty, exit 0', () => {
     const { exitCode, stdout } = run(['get', 'auto_upgrade']);
@@ -96,7 +96,7 @@ describe('gstack-config', () => {
 
   test('set creates state dir if missing', () => {
     const nestedDir = join(stateDir, 'nested', 'dir');
-    const { exitCode } = run(['set', 'foo', 'bar'], { GSTACK_STATE_DIR: nestedDir });
+    const { exitCode } = run(['set', 'foo', 'bar'], { MSTACK_STATE_DIR: nestedDir });
     expect(exitCode).toBe(0);
     expect(existsSync(join(nestedDir, 'config.yaml'))).toBe(true);
   });
@@ -140,7 +140,7 @@ describe('gstack-config', () => {
   test('first set writes annotated header with docs', () => {
     run(['set', 'telemetry', 'off']);
     const content = readFileSync(join(stateDir, 'config.yaml'), 'utf-8');
-    expect(content).toContain('# gstack configuration');
+    expect(content).toContain('# mstack configuration');
     expect(content).toContain('edit freely');
     expect(content).toContain('proactive:');
     expect(content).toContain('telemetry:');
@@ -155,7 +155,7 @@ describe('gstack-config', () => {
     run(['set', 'foo', 'bar']);
     run(['set', 'baz', 'qux']);
     const content = readFileSync(join(stateDir, 'config.yaml'), 'utf-8');
-    const headerCount = (content.match(/# gstack configuration/g) || []).length;
+    const headerCount = (content.match(/# mstack configuration/g) || []).length;
     expect(headerCount).toBe(1);
   });
 
@@ -172,7 +172,7 @@ describe('gstack-config', () => {
     run(['set', 'new_key', 'new_value']);
     const content = readFileSync(join(stateDir, 'config.yaml'), 'utf-8');
     expect(content).toContain('existing: value');
-    expect(content).not.toContain('# gstack configuration');
+    expect(content).not.toContain('# mstack configuration');
   });
 
   // ─── routing_declined ──────────────────────────────────────

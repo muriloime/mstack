@@ -1,5 +1,5 @@
 /**
- * gstack browse server — persistent Chromium daemon
+ * mstack browse server — persistent Chromium daemon
  *
  * Architecture:
  *   Bun.serve HTTP on localhost → routes commands to Playwright
@@ -8,8 +8,8 @@
  *   Auto-shutdown after BROWSE_IDLE_TIMEOUT (default 30 min)
  *
  * State:
- *   State file: <project-root>/.gstack/browse.json (set via BROWSE_STATE_FILE env)
- *   Log files:  <project-root>/.gstack/browse-{console,network,dialog}.log
+ *   State file: <project-root>/.mstack/browse.json (set via BROWSE_STATE_FILE env)
+ *   Log files:  <project-root>/.mstack/browse-{console,network,dialog}.log
  *   Port:       random 10000-60000 (or BROWSE_PORT env for debug override)
  */
 
@@ -197,10 +197,10 @@ export interface ServerConfig {
   proxyBridge?: BridgeHandle | null;
   startTime: number;
   /**
-   * Overlay hook. Runs AFTER gstack resolves auth and BEFORE route dispatch.
-   * Invalid tokens are auto-rejected at the gstack layer (401 returned
+   * Overlay hook. Runs AFTER mstack resolves auth and BEFORE route dispatch.
+   * Invalid tokens are auto-rejected at the mstack layer (401 returned
    * before hook fires), so the hook only ever sees valid TokenInfo or null
-   * (no token presented). Returning a Response short-circuits gstack
+   * (no token presented). Returning a Response short-circuits mstack
    * dispatch; returning null falls through.
    */
   beforeRoute?: (req: Request, surface: Surface, auth: TokenInfo | null) => Promise<Response | null>;
@@ -227,7 +227,7 @@ export interface ServerHandle {
 }
 
 /**
- * Build a ServerConfig-shaped object from process.env. Used by gstack's
+ * Build a ServerConfig-shaped object from process.env. Used by mstack's
  * own CLI when running `bun run dev` or the compiled binary directly.
  * Embedders construct their own ServerConfig explicitly.
  *
@@ -299,7 +299,7 @@ export function canDispatchOverTunnel(command: string | undefined | null): boole
 }
 
 /**
- * Read ngrok authtoken from env var, ~/.gstack/ngrok.env, or ngrok's native
+ * Read ngrok authtoken from env var, ~/.mstack/ngrok.env, or ngrok's native
  * config files.  Returns null if nothing found.  Shared between the
  * /tunnel/start handler and the BROWSE_TUNNEL=1 auto-start flow.
  */
@@ -308,7 +308,7 @@ function resolveNgrokAuthtoken(): string | null {
   if (authtoken) return authtoken;
 
   const home = process.env.HOME || '';
-  const ngrokEnvPath = path.join(home, '.gstack', 'ngrok.env');
+  const ngrokEnvPath = path.join(home, '.mstack', 'ngrok.env');
   if (fs.existsSync(ngrokEnvPath)) {
     try {
       const envContent = fs.readFileSync(ngrokEnvPath, 'utf-8');
@@ -436,7 +436,7 @@ function generateHelpText(): string {
     'Visual', 'Snapshot', 'Meta', 'Tabs', 'Server',
   ];
 
-  const lines = ['gstack browse — headless browser for AI agents', '', 'Commands:'];
+  const lines = ['mstack browse — headless browser for AI agents', '', 'Commands:'];
   for (const cat of categoryOrder) {
     const cmds = groups.get(cat);
     if (!cmds) continue;
@@ -588,7 +588,7 @@ const BROWSE_PARENT_PID = parseInt(process.env.BROWSE_PARENT_PID || '0', 10);
 // Outer gate: if the spawner explicitly marks this as headed (env var set at
 // launch time), skip registering the watchdog entirely. Cheaper than entering
 // the closure every 15s. The CLI's connect path sets BROWSE_HEADED=1 + PID=0,
-// so this branch is the normal path for /open-gstack-browser.
+// so this branch is the normal path for /open-mstack-browser.
 const IS_HEADED_WATCHDOG = process.env.BROWSE_HEADED === '1';
 if (BROWSE_PARENT_PID > 0 && !IS_HEADED_WATCHDOG) {
   let parentGone = false;
@@ -603,7 +603,7 @@ if (BROWSE_PARENT_PID > 0 && !IS_HEADED_WATCHDOG) {
       // 2. Headed / tunnel mode? Shutdown. The idle timeout doesn't apply in
       //    these modes (see idleCheckInterval above — both early-return), so
       //    ignoring parent death here would leak orphan daemons after
-      //    /pair-agent or /open-gstack-browser sessions.
+      //    /pair-agent or /open-mstack-browser sessions.
       // 3. Normal (headless) mode? Stay alive. Claude Code's Bash tool kills
       //    the parent shell between invocations. The idle timeout (30 min)
       //    handles eventual cleanup.
@@ -1131,7 +1131,7 @@ async function handleCommand(body: any, tokenInfo?: TokenInfo | null): Promise<R
 //
 // Gated on `import.meta.main` so embedders (gbrowser phoenix) that import
 // server.ts as a submodule can register their own signal handlers without
-// fighting with gstack's. CLI path is unchanged.
+// fighting with mstack's. CLI path is unchanged.
 if (import.meta.main) {
   // SIGINT (Ctrl+C): user intentionally stopping → shutdown.
   process.on('SIGINT', () => activeShutdown?.());
@@ -1389,21 +1389,21 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
       // Welcome page — served when GStack Browser launches in headed mode
       if (url.pathname === '/welcome') {
         const welcomePath = (() => {
-          // Gate GSTACK_SLUG on a strict regex BEFORE interpolating it into
+          // Gate MSTACK_SLUG on a strict regex BEFORE interpolating it into
           // the filesystem path. Without this, a slug like "../../etc/passwd"
-          // would resolve to ~/.gstack/projects/../../etc/passwd/... — path
+          // would resolve to ~/.mstack/projects/../../etc/passwd/... — path
           // traversal.  Not exploitable today (attacker needs local env-var
           // access), but the gate is one regex and buys us defense-in-depth.
-          const rawSlug = process.env.GSTACK_SLUG || 'unknown';
+          const rawSlug = process.env.MSTACK_SLUG || 'unknown';
           const slug = /^[a-z0-9_-]+$/.test(rawSlug) ? rawSlug : 'unknown';
           const homeDir = process.env.HOME || process.env.USERPROFILE || '/tmp';
-          const projectWelcome = `${homeDir}/.gstack/projects/${slug}/designs/welcome-page-20260331/finalized.html`;
+          const projectWelcome = `${homeDir}/.mstack/projects/${slug}/designs/welcome-page-20260331/finalized.html`;
           if (fs.existsSync(projectWelcome)) return projectWelcome;
-          // Fallback: built-in welcome page from gstack install.  Reject
+          // Fallback: built-in welcome page from mstack install.  Reject
           // SKILL_ROOT values containing '..' for the same defense-in-depth
-          // reason as the GSTACK_SLUG regex above.  Not exploitable today
+          // reason as the MSTACK_SLUG regex above.  Not exploitable today
           // (env set at install time), but the gate is one check.
-          const rawSkillRoot = process.env.GSTACK_SKILL_ROOT || `${homeDir}/.claude/skills/gstack`;
+          const rawSkillRoot = process.env.MSTACK_SKILL_ROOT || `${homeDir}/.claude/skills/mstack`;
           if (rawSkillRoot.includes('..')) return null;
           const builtinWelcome = `${rawSkillRoot}/browse/src/welcome.html`;
           if (fs.existsSync(builtinWelcome)) return builtinWelcome;
@@ -1724,7 +1724,7 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
           await closeTunnel();
         }
 
-        // 1) Resolve ngrok authtoken from env / .gstack / native config
+        // 1) Resolve ngrok authtoken from env / .mstack / native config
         const authtoken = resolveNgrokAuthtoken();
         if (!authtoken) {
           return new Response(JSON.stringify({
@@ -2508,7 +2508,7 @@ export async function start() {
   if (process.env.BROWSE_TUNNEL === '1') {
     const authtoken = resolveNgrokAuthtoken();
     if (!authtoken) {
-      console.error('[browse] BROWSE_TUNNEL=1 but no NGROK_AUTHTOKEN found. Set it via env var or ~/.gstack/ngrok.env');
+      console.error('[browse] BROWSE_TUNNEL=1 but no NGROK_AUTHTOKEN found. Set it via env var or ~/.mstack/ngrok.env');
     } else {
       let boundTunnel: ReturnType<typeof Bun.serve> | null = null;
       try {

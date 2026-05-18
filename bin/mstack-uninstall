@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# gstack-uninstall — remove gstack skills, state, and browse daemons
+# mstack-uninstall — remove mstack skills, state, and browse daemons
 #
 # Usage:
-#   gstack-uninstall              — interactive uninstall (prompts before removing)
-#   gstack-uninstall --force      — remove everything without prompting
-#   gstack-uninstall --keep-state — remove skills but keep ~/.gstack/ data
+#   mstack-uninstall              — interactive uninstall (prompts before removing)
+#   mstack-uninstall --force      — remove everything without prompting
+#   mstack-uninstall --keep-state — remove skills but keep ~/.mstack/ data
 #
 # What gets REMOVED:
-#   ~/.claude/skills/gstack       — global Claude skill install (git clone or vendored)
+#   ~/.claude/skills/mstack       — global Claude skill install (git clone or vendored)
 #   ~/.claude/skills/{skill}      — per-skill symlinks created by setup
-#   ~/.codex/skills/gstack*       — Codex skill install + per-skill symlinks
-#   ~/.factory/skills/gstack*     — Factory Droid skill install + per-skill symlinks
-#   ~/.kiro/skills/gstack*        — Kiro skill install + per-skill symlinks
-#   ~/.gstack/                    — global state (config, analytics, sessions, projects,
+#   ~/.codex/skills/mstack*       — Codex skill install + per-skill symlinks
+#   ~/.factory/skills/mstack*     — Factory Droid skill install + per-skill symlinks
+#   ~/.kiro/skills/mstack*        — Kiro skill install + per-skill symlinks
+#   ~/.mstack/                    — global state (config, analytics, sessions, projects,
 #                                   repos, installation-id, browse error logs)
-#   .claude/skills/gstack*        — project-local skill install (--local installs)
-#   .gstack/                      — per-project browse state (in current git repo)
-#   .gstack-worktrees/            — per-project test worktrees (in current git repo)
-#   .agents/skills/gstack*        — Codex/Gemini/Cursor sidecar (in current git repo)
+#   .claude/skills/mstack*        — project-local skill install (--local installs)
+#   .mstack/                      — per-project browse state (in current git repo)
+#   .mstack-worktrees/            — per-project test worktrees (in current git repo)
+#   .agents/skills/mstack*        — Codex/Gemini/Cursor sidecar (in current git repo)
 #   Running browse daemons        — stopped via SIGTERM before cleanup
 #
 # What is NOT REMOVED:
 #   ~/Library/Caches/ms-playwright/  — Playwright Chromium (shared, may be used by other tools)
-#   ~/.gstack-dev/                   — developer eval artifacts (only present in gstack contributors)
+#   ~/.mstack-dev/                   — developer eval artifacts (only present in mstack contributors)
 #
 # Env overrides (for testing):
-#   GSTACK_DIR        — override auto-detected gstack root
-#   GSTACK_STATE_DIR  — override ~/.gstack state directory
+#   MSTACK_DIR        — override auto-detected mstack root
+#   MSTACK_STATE_DIR  — override ~/.mstack state directory
 #
 # NOTE: Uses set -uo pipefail (no -e) — uninstall must never abort partway.
 set -uo pipefail
@@ -36,8 +36,8 @@ if [ -z "${HOME:-}" ]; then
   exit 1
 fi
 
-GSTACK_DIR="${GSTACK_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
-STATE_DIR="${GSTACK_STATE_DIR:-$HOME/.gstack}"
+MSTACK_DIR="${MSTACK_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+STATE_DIR="${MSTACK_STATE_DIR:-$HOME/.mstack}"
 _GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
 # ─── Parse flags ─────────────────────────────────────────────
@@ -53,7 +53,7 @@ while [ $# -gt 0 ]; do
       ;;
     *)
       echo "Unknown option: $1" >&2
-      echo "Usage: gstack-uninstall [--force] [--keep-state]" >&2
+      echo "Usage: mstack-uninstall [--force] [--keep-state]" >&2
       exit 1
       ;;
   esac
@@ -61,23 +61,23 @@ done
 
 # ─── Confirmation ────────────────────────────────────────────
 if [ "$FORCE" -eq 0 ]; then
-  echo "This will remove gstack from your system:"
-  { [ -d "$HOME/.claude/skills/gstack" ] || [ -L "$HOME/.claude/skills/gstack" ]; } && echo "  ~/.claude/skills/gstack (+ per-skill symlinks)"
-  [ -d "$HOME/.codex/skills" ] && echo "  ~/.codex/skills/gstack*"
-  [ -d "$HOME/.factory/skills" ] && echo "  ~/.factory/skills/gstack*"
-  [ -d "$HOME/.kiro/skills" ] && echo "  ~/.kiro/skills/gstack*"
+  echo "This will remove mstack from your system:"
+  { [ -d "$HOME/.claude/skills/mstack" ] || [ -L "$HOME/.claude/skills/mstack" ]; } && echo "  ~/.claude/skills/mstack (+ per-skill symlinks)"
+  [ -d "$HOME/.codex/skills" ] && echo "  ~/.codex/skills/mstack*"
+  [ -d "$HOME/.factory/skills" ] && echo "  ~/.factory/skills/mstack*"
+  [ -d "$HOME/.kiro/skills" ] && echo "  ~/.kiro/skills/mstack*"
   [ "$KEEP_STATE" -eq 0 ] && [ -d "$STATE_DIR" ] && echo "  $STATE_DIR"
 
   if [ -n "$_GIT_ROOT" ]; then
-    [ -d "$_GIT_ROOT/.claude/skills/gstack" ] && echo "  $_GIT_ROOT/.claude/skills/gstack (project-local)"
-    [ -d "$_GIT_ROOT/.gstack" ] && echo "  $_GIT_ROOT/.gstack/ (browse state + reports)"
-    [ -d "$_GIT_ROOT/.gstack-worktrees" ] && echo "  $_GIT_ROOT/.gstack-worktrees/"
-    [ -d "$_GIT_ROOT/.agents/skills" ] && echo "  $_GIT_ROOT/.agents/skills/gstack*"
+    [ -d "$_GIT_ROOT/.claude/skills/mstack" ] && echo "  $_GIT_ROOT/.claude/skills/mstack (project-local)"
+    [ -d "$_GIT_ROOT/.mstack" ] && echo "  $_GIT_ROOT/.mstack/ (browse state + reports)"
+    [ -d "$_GIT_ROOT/.mstack-worktrees" ] && echo "  $_GIT_ROOT/.mstack-worktrees/"
+    [ -d "$_GIT_ROOT/.agents/skills" ] && echo "  $_GIT_ROOT/.agents/skills/mstack*"
   fi
 
   # Preview running daemons
-  if [ -n "$_GIT_ROOT" ] && [ -f "$_GIT_ROOT/.gstack/browse.json" ]; then
-    _PREVIEW_PID="$(awk -F'[:,]' '/"pid"/ { for(i=1;i<=NF;i++) if($i ~ /"pid"/) { gsub(/[^0-9]/, "", $(i+1)); print $(i+1); exit } }' "$_GIT_ROOT/.gstack/browse.json" 2>/dev/null || true)"
+  if [ -n "$_GIT_ROOT" ] && [ -f "$_GIT_ROOT/.mstack/browse.json" ]; then
+    _PREVIEW_PID="$(awk -F'[:,]' '/"pid"/ { for(i=1;i<=NF;i++) if($i ~ /"pid"/) { gsub(/[^0-9]/, "", $(i+1)); print $(i+1); exit } }' "$_GIT_ROOT/.mstack/browse.json" 2>/dev/null || true)"
     [ -n "$_PREVIEW_PID" ] && kill -0 "$_PREVIEW_PID" 2>/dev/null && echo "  browse daemon (PID $_PREVIEW_PID) will be stopped"
   fi
 
@@ -92,7 +92,7 @@ fi
 REMOVED=()
 
 # ─── Stop running browse daemons ─────────────────────────────
-# Browse servers write PID to {project}/.gstack/browse.json.
+# Browse servers write PID to {project}/.mstack/browse.json.
 # Stop any we can find before removing state directories.
 stop_browse_daemon() {
   local state_file="$1"
@@ -117,33 +117,33 @@ stop_browse_daemon() {
 }
 
 # Stop daemon in current project
-if [ -n "$_GIT_ROOT" ] && [ -f "$_GIT_ROOT/.gstack/browse.json" ]; then
-  stop_browse_daemon "$_GIT_ROOT/.gstack/browse.json"
+if [ -n "$_GIT_ROOT" ] && [ -f "$_GIT_ROOT/.mstack/browse.json" ]; then
+  stop_browse_daemon "$_GIT_ROOT/.mstack/browse.json"
 fi
 
 # Stop daemons tracked in global projects directory
 if [ -d "$STATE_DIR/projects" ]; then
   while IFS= read -r _BJ; do
     stop_browse_daemon "$_BJ"
-  done < <(find "$STATE_DIR/projects" -name browse.json -path '*/.gstack/*' 2>/dev/null || true)
+  done < <(find "$STATE_DIR/projects" -name browse.json -path '*/.mstack/*' 2>/dev/null || true)
 fi
 
 # ─── Remove global Claude skills ────────────────────────────
 CLAUDE_SKILLS="$HOME/.claude/skills"
-if [ -d "$CLAUDE_SKILLS/gstack" ] || [ -L "$CLAUDE_SKILLS/gstack" ]; then
-  # Remove per-skill symlinks that point into gstack/
+if [ -d "$CLAUDE_SKILLS/mstack" ] || [ -L "$CLAUDE_SKILLS/mstack" ]; then
+  # Remove per-skill symlinks that point into mstack/
   for _LINK in "$CLAUDE_SKILLS"/*; do
     [ -L "$_LINK" ] || continue
     _NAME="$(basename "$_LINK")"
-    [ "$_NAME" = "gstack" ] && continue
+    [ "$_NAME" = "mstack" ] && continue
     _TARGET="$(readlink "$_LINK" 2>/dev/null || true)"
     case "$_TARGET" in
-      gstack/*|*/gstack/*) rm -f "$_LINK"; REMOVED+=("claude/$_NAME") ;;
+      mstack/*|*/mstack/*) rm -f "$_LINK"; REMOVED+=("claude/$_NAME") ;;
     esac
   done
 
-  rm -rf "$CLAUDE_SKILLS/gstack"
-  REMOVED+=("~/.claude/skills/gstack")
+  rm -rf "$CLAUDE_SKILLS/mstack"
+  REMOVED+=("~/.claude/skills/mstack")
 fi
 
 # ─── Remove project-local Claude skills (--local installs) ──
@@ -152,19 +152,19 @@ if [ -n "$_GIT_ROOT" ] && [ -d "$_GIT_ROOT/.claude/skills" ]; then
     [ -L "$_LINK" ] || continue
     _TARGET="$(readlink "$_LINK" 2>/dev/null || true)"
     case "$_TARGET" in
-      gstack/*|*/gstack/*) rm -f "$_LINK"; REMOVED+=("local claude/$(basename "$_LINK")") ;;
+      mstack/*|*/mstack/*) rm -f "$_LINK"; REMOVED+=("local claude/$(basename "$_LINK")") ;;
     esac
   done
-  if [ -d "$_GIT_ROOT/.claude/skills/gstack" ] || [ -L "$_GIT_ROOT/.claude/skills/gstack" ]; then
-    rm -rf "$_GIT_ROOT/.claude/skills/gstack"
-    REMOVED+=("$_GIT_ROOT/.claude/skills/gstack")
+  if [ -d "$_GIT_ROOT/.claude/skills/mstack" ] || [ -L "$_GIT_ROOT/.claude/skills/mstack" ]; then
+    rm -rf "$_GIT_ROOT/.claude/skills/mstack"
+    REMOVED+=("$_GIT_ROOT/.claude/skills/mstack")
   fi
 fi
 
 # ─── Remove Codex skills ────────────────────────────────────
 CODEX_SKILLS="$HOME/.codex/skills"
 if [ -d "$CODEX_SKILLS" ]; then
-  for _ITEM in "$CODEX_SKILLS"/gstack*; do
+  for _ITEM in "$CODEX_SKILLS"/mstack*; do
     [ -e "$_ITEM" ] || [ -L "$_ITEM" ] || continue
     rm -rf "$_ITEM"
     REMOVED+=("codex/$(basename "$_ITEM")")
@@ -174,7 +174,7 @@ fi
 # ─── Remove Factory Droid skills ────────────────────────────
 FACTORY_SKILLS="$HOME/.factory/skills"
 if [ -d "$FACTORY_SKILLS" ]; then
-  for _ITEM in "$FACTORY_SKILLS"/gstack*; do
+  for _ITEM in "$FACTORY_SKILLS"/mstack*; do
     [ -e "$_ITEM" ] || [ -L "$_ITEM" ] || continue
     rm -rf "$_ITEM"
     REMOVED+=("factory/$(basename "$_ITEM")")
@@ -184,7 +184,7 @@ fi
 # ─── Remove Kiro skills ─────────────────────────────────────
 KIRO_SKILLS="$HOME/.kiro/skills"
 if [ -d "$KIRO_SKILLS" ]; then
-  for _ITEM in "$KIRO_SKILLS"/gstack*; do
+  for _ITEM in "$KIRO_SKILLS"/mstack*; do
     [ -e "$_ITEM" ] || [ -L "$_ITEM" ] || continue
     rm -rf "$_ITEM"
     REMOVED+=("kiro/$(basename "$_ITEM")")
@@ -193,7 +193,7 @@ fi
 
 # ─── Remove per-project .agents/ sidecar ─────────────────────
 if [ -n "$_GIT_ROOT" ] && [ -d "$_GIT_ROOT/.agents/skills" ]; then
-  for _ITEM in "$_GIT_ROOT/.agents/skills"/gstack*; do
+  for _ITEM in "$_GIT_ROOT/.agents/skills"/mstack*; do
     [ -e "$_ITEM" ] || [ -L "$_ITEM" ] || continue
     rm -rf "$_ITEM"
     REMOVED+=("agents/$(basename "$_ITEM")")
@@ -205,7 +205,7 @@ fi
 
 # ─── Remove per-project .factory/ sidecar ────────────────────
 if [ -n "$_GIT_ROOT" ] && [ -d "$_GIT_ROOT/.factory/skills" ]; then
-  for _ITEM in "$_GIT_ROOT/.factory/skills"/gstack*; do
+  for _ITEM in "$_GIT_ROOT/.factory/skills"/mstack*; do
     [ -e "$_ITEM" ] || [ -L "$_ITEM" ] || continue
     rm -rf "$_ITEM"
     REMOVED+=("factory/$(basename "$_ITEM")")
@@ -217,19 +217,19 @@ fi
 
 # ─── Remove per-project state ───────────────────────────────
 if [ -n "$_GIT_ROOT" ]; then
-  if [ -d "$_GIT_ROOT/.gstack" ]; then
-    rm -rf "$_GIT_ROOT/.gstack"
-    REMOVED+=("$_GIT_ROOT/.gstack/")
+  if [ -d "$_GIT_ROOT/.mstack" ]; then
+    rm -rf "$_GIT_ROOT/.mstack"
+    REMOVED+=("$_GIT_ROOT/.mstack/")
   fi
-  if [ -d "$_GIT_ROOT/.gstack-worktrees" ]; then
-    rm -rf "$_GIT_ROOT/.gstack-worktrees"
-    REMOVED+=("$_GIT_ROOT/.gstack-worktrees/")
+  if [ -d "$_GIT_ROOT/.mstack-worktrees" ]; then
+    rm -rf "$_GIT_ROOT/.mstack-worktrees"
+    REMOVED+=("$_GIT_ROOT/.mstack-worktrees/")
   fi
 fi
 
 # ─── Remove SessionStart hook from Claude Code settings ─────
-SETTINGS_HOOK="$(dirname "$0")/gstack-settings-hook"
-SESSION_UPDATE="$(dirname "$0")/gstack-session-update"
+SETTINGS_HOOK="$(dirname "$0")/mstack-settings-hook"
+SESSION_UPDATE="$(dirname "$0")/mstack-session-update"
 if [ -x "$SETTINGS_HOOK" ]; then
   "$SETTINGS_HOOK" remove "$SESSION_UPDATE" 2>/dev/null && REMOVED+=("SessionStart hook") || true
 fi
@@ -241,7 +241,7 @@ if [ "$KEEP_STATE" -eq 0 ] && [ -d "$STATE_DIR" ]; then
 fi
 
 # ─── Clean up temp files ────────────────────────────────────
-for _TMP in /tmp/gstack-latest-version /tmp/gstack-sketch-*.html /tmp/gstack-sketch.png /tmp/gstack-sync-*; do
+for _TMP in /tmp/mstack-latest-version /tmp/mstack-sketch-*.html /tmp/mstack-sketch.png /tmp/mstack-sync-*; do
   if [ -e "$_TMP" ]; then
     rm -f "$_TMP"
     REMOVED+=("$(basename "$_TMP")")
@@ -251,9 +251,9 @@ done
 # ─── Summary ────────────────────────────────────────────────
 if [ ${#REMOVED[@]} -gt 0 ]; then
   echo "Removed: ${REMOVED[*]}"
-  echo "gstack uninstalled."
+  echo "mstack uninstalled."
 else
-  echo "Nothing to remove — gstack is not installed."
+  echo "Nothing to remove — mstack is not installed."
 fi
 
 exit 0

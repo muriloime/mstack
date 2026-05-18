@@ -114,8 +114,8 @@ describe("validateHostConfig", () => {
       name: "test-host",
       displayName: "Test Host",
       cliCommand: "testcli",
-      globalRoot: ".test/skills/gstack",
-      localSkillRoot: ".test/skills/gstack",
+      globalRoot: ".test/skills/mstack",
+      localSkillRoot: ".test/skills/mstack",
       hostSubdir: ".test",
       usesEnvVars: true,
       frontmatter: { mode: "allowlist", keepFields: ["name", "description"] },
@@ -215,8 +215,8 @@ describe("validateHostConfig", () => {
 
   test("paths with $ and ~ are valid", () => {
     const c = makeValid();
-    c.globalRoot = "$HOME/.test/skills/gstack";
-    c.localSkillRoot = "~/.test/skills/gstack";
+    c.globalRoot = "$HOME/.test/skills/mstack";
+    c.localSkillRoot = "~/.test/skills/mstack";
     expect(validateHostConfig(c)).toEqual([]);
   });
 
@@ -248,7 +248,7 @@ describe("validateAllConfigs", () => {
       ...codex,
       name: "dup-host",
       hostSubdir: ".claude",
-      globalRoot: ".dup/skills/gstack",
+      globalRoot: ".dup/skills/mstack",
     } as HostConfig;
     const errors = validateAllConfigs([claude, dup]);
     expect(errors.some((e) => e.includes("Duplicate hostSubdir"))).toBe(true);
@@ -259,7 +259,7 @@ describe("validateAllConfigs", () => {
       ...codex,
       name: "dup-host",
       hostSubdir: ".dup",
-      globalRoot: ".claude/skills/gstack",
+      globalRoot: ".claude/skills/mstack",
     } as HostConfig;
     const errors = validateAllConfigs([claude, dup]);
     expect(errors.some((e) => e.includes("Duplicate globalRoot"))).toBe(true);
@@ -276,28 +276,28 @@ describe("validateAllConfigs", () => {
 
 describe("HOST_PATHS derivation from configs", () => {
   test("Claude uses literal home paths (no env vars)", () => {
-    expect(HOST_PATHS.claude.skillRoot).toBe("~/.claude/skills/gstack");
-    expect(HOST_PATHS.claude.binDir).toBe("~/.claude/skills/gstack/bin");
+    expect(HOST_PATHS.claude.skillRoot).toBe("~/.claude/skills/mstack");
+    expect(HOST_PATHS.claude.binDir).toBe("~/.claude/skills/mstack/bin");
     expect(HOST_PATHS.claude.browseDir).toBe(
-      "~/.claude/skills/gstack/browse/dist",
+      "~/.claude/skills/mstack/browse/dist",
     );
     expect(HOST_PATHS.claude.designDir).toBe(
-      "~/.claude/skills/gstack/design/dist",
+      "~/.claude/skills/mstack/design/dist",
     );
   });
 
-  test("Codex uses $GSTACK_ROOT env vars", () => {
-    expect(HOST_PATHS.codex.skillRoot).toBe("$GSTACK_ROOT");
-    expect(HOST_PATHS.codex.binDir).toBe("$GSTACK_BIN");
-    expect(HOST_PATHS.codex.browseDir).toBe("$GSTACK_BROWSE");
-    expect(HOST_PATHS.codex.designDir).toBe("$GSTACK_DESIGN");
+  test("Codex uses $MSTACK_ROOT env vars", () => {
+    expect(HOST_PATHS.codex.skillRoot).toBe("$MSTACK_ROOT");
+    expect(HOST_PATHS.codex.binDir).toBe("$MSTACK_BIN");
+    expect(HOST_PATHS.codex.browseDir).toBe("$MSTACK_BROWSE");
+    expect(HOST_PATHS.codex.designDir).toBe("$MSTACK_DESIGN");
   });
 
   test("every host with usesEnvVars=true gets env var paths", () => {
     for (const config of ALL_HOST_CONFIGS) {
       if (config.usesEnvVars) {
-        expect(HOST_PATHS[config.name].skillRoot).toBe("$GSTACK_ROOT");
-        expect(HOST_PATHS[config.name].binDir).toBe("$GSTACK_BIN");
+        expect(HOST_PATHS[config.name].skillRoot).toBe("$MSTACK_ROOT");
+        expect(HOST_PATHS[config.name].binDir).toBe("$MSTACK_BIN");
       }
     }
   });
@@ -358,7 +358,7 @@ describe("host-config-export.ts CLI", () => {
   test("get returns string field", () => {
     const { stdout, exitCode } = run("get", "codex", "globalRoot");
     expect(exitCode).toBe(0);
-    expect(stdout).toBe(".codex/skills/gstack");
+    expect(stdout).toBe(".codex/skills/mstack");
   });
 
   test("get returns boolean as 1/0", () => {
@@ -478,7 +478,7 @@ describe("host config correctness", () => {
 
   test("codex has sidecar config", () => {
     expect(codex.sidecar).toBeDefined();
-    expect(codex.sidecar!.path).toBe(".agents/skills/gstack");
+    expect(codex.sidecar!.path).toBe(".agents/skills/mstack");
   });
 
   test("factory has tool rewrites", () => {

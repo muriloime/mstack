@@ -5,8 +5,8 @@
  *   0. Live gbrain-availability hint (per /plan-eng-review): when gbrain is
  *      configured, emit one of two variants (steady-state vs empty-corpus
  *      emergency). Zero context cost when gbrain is not configured.
- *   1. If ~/.gstack-artifacts-remote.txt (or legacy ~/.gstack-brain-remote.txt
- *      during the v1.27.0.0 migration window) exists AND ~/.gstack/.git is
+ *   1. If ~/.mstack-artifacts-remote.txt (or legacy ~/.mstack-brain-remote.txt
+ *      during the v1.27.0.0 migration window) exists AND ~/.mstack/.git is
  *      missing, surface a restore-available hint (does NOT auto-run restore).
  *   2. If sync is on, run `gstack-brain-sync --once` (drain + push). The
  *      script keeps its old name; only the config-key + state-file names flip.
@@ -34,16 +34,16 @@ export function generateBrainSyncBlock(ctx: TemplateContext): string {
   return `## Artifacts Sync (skill start)
 
 \`\`\`bash
-_GSTACK_HOME="\${GSTACK_HOME:-$HOME/.gstack}"
+_MSTACK_HOME="\${MSTACK_HOME:-$HOME/.mstack}"
 # Prefer the v1.27.0.0 artifacts file; fall back to brain file for users
 # upgrading mid-stream before the migration script runs.
-if [ -f "$HOME/.gstack-artifacts-remote.txt" ]; then
-  _BRAIN_REMOTE_FILE="$HOME/.gstack-artifacts-remote.txt"
+if [ -f "$HOME/.mstack-artifacts-remote.txt" ]; then
+  _BRAIN_REMOTE_FILE="$HOME/.mstack-artifacts-remote.txt"
 else
-  _BRAIN_REMOTE_FILE="$HOME/.gstack-brain-remote.txt"
+  _BRAIN_REMOTE_FILE="$HOME/.mstack-brain-remote.txt"
 fi
 _BRAIN_SYNC_BIN="${ctx.paths.binDir}/gstack-brain-sync"
-_BRAIN_CONFIG_BIN="${ctx.paths.binDir}/gstack-config"
+_BRAIN_CONFIG_BIN="${ctx.paths.binDir}/mstack-config"
 
 # /sync-gbrain context-load: teach the agent to use gbrain when it's available.
 # Per-worktree pin: post-spike redesign uses kubectl-style \`.gbrain-source\` in the
@@ -88,16 +88,16 @@ if command -v jq >/dev/null 2>&1 && [ -f "$HOME/.claude.json" ]; then
   esac
 fi
 
-if [ -f "$_BRAIN_REMOTE_FILE" ] && [ ! -d "$_GSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" = "off" ]; then
+if [ -f "$_BRAIN_REMOTE_FILE" ] && [ ! -d "$_MSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" = "off" ]; then
   _BRAIN_NEW_URL=$(head -1 "$_BRAIN_REMOTE_FILE" 2>/dev/null | tr -d '[:space:]')
   if [ -n "$_BRAIN_NEW_URL" ]; then
     echo "ARTIFACTS_SYNC: artifacts repo detected: $_BRAIN_NEW_URL"
-    echo "ARTIFACTS_SYNC: run 'gstack-brain-restore' to pull your cross-machine artifacts (or 'gstack-config set artifacts_sync_mode off' to dismiss forever)"
+    echo "ARTIFACTS_SYNC: run 'gstack-brain-restore' to pull your cross-machine artifacts (or 'mstack-config set artifacts_sync_mode off' to dismiss forever)"
   fi
 fi
 
-if [ -d "$_GSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" != "off" ]; then
-  _BRAIN_LAST_PULL_FILE="$_GSTACK_HOME/.brain-last-pull"
+if [ -d "$_MSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" != "off" ]; then
+  _BRAIN_LAST_PULL_FILE="$_MSTACK_HOME/.brain-last-pull"
   _BRAIN_NOW=$(date +%s)
   _BRAIN_DO_PULL=1
   if [ -f "$_BRAIN_LAST_PULL_FILE" ]; then
@@ -106,7 +106,7 @@ if [ -d "$_GSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" != "off" ]; then
     [ "$_BRAIN_AGE" -lt 86400 ] && _BRAIN_DO_PULL=0
   fi
   if [ "$_BRAIN_DO_PULL" = "1" ]; then
-    ( cd "$_GSTACK_HOME" && git fetch origin >/dev/null 2>&1 && git merge --ff-only "origin/$(git rev-parse --abbrev-ref HEAD)" >/dev/null 2>&1 ) || true
+    ( cd "$_MSTACK_HOME" && git fetch origin >/dev/null 2>&1 && git merge --ff-only "origin/$(git rev-parse --abbrev-ref HEAD)" >/dev/null 2>&1 ) || true
     echo "$_BRAIN_NOW" > "$_BRAIN_LAST_PULL_FILE"
   fi
   "$_BRAIN_SYNC_BIN" --once 2>/dev/null || true
@@ -117,11 +117,11 @@ if [ "$_GBRAIN_MCP_MODE" = "remote-http" ]; then
   # pulls from GitHub/GitLab). Show the user this is by design, not broken.
   _GBRAIN_HOST=$(jq -r '.mcpServers.gbrain.url // empty' "$HOME/.claude.json" 2>/dev/null | sed -E 's|^https?://([^/:]+).*|\\1|')
   echo "ARTIFACTS_SYNC: remote-mode (managed by brain server \${_GBRAIN_HOST:-remote})"
-elif [ -d "$_GSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" != "off" ]; then
+elif [ -d "$_MSTACK_HOME/.git" ] && [ "$_BRAIN_SYNC_MODE" != "off" ]; then
   _BRAIN_QUEUE_DEPTH=0
-  [ -f "$_GSTACK_HOME/.brain-queue.jsonl" ] && _BRAIN_QUEUE_DEPTH=$(wc -l < "$_GSTACK_HOME/.brain-queue.jsonl" | tr -d ' ')
+  [ -f "$_MSTACK_HOME/.brain-queue.jsonl" ] && _BRAIN_QUEUE_DEPTH=$(wc -l < "$_MSTACK_HOME/.brain-queue.jsonl" | tr -d ' ')
   _BRAIN_LAST_PUSH="never"
-  [ -f "$_GSTACK_HOME/.brain-last-push" ] && _BRAIN_LAST_PUSH=$(cat "$_GSTACK_HOME/.brain-last-push" 2>/dev/null || echo never)
+  [ -f "$_MSTACK_HOME/.brain-last-push" ] && _BRAIN_LAST_PUSH=$(cat "$_MSTACK_HOME/.brain-last-push" 2>/dev/null || echo never)
   echo "ARTIFACTS_SYNC: mode=$_BRAIN_SYNC_MODE | last_push=$_BRAIN_LAST_PUSH | queue=$_BRAIN_QUEUE_DEPTH"
 else
   echo "ARTIFACTS_SYNC: off"
@@ -132,7 +132,7 @@ ${isBrainHost ? `If output shows \`ARTIFACTS_SYNC: artifacts repo detected\`, of
 
 Privacy stop-gate: if output shows \`ARTIFACTS_SYNC: off\`, \`artifacts_sync_mode_prompted\` is \`false\`, and gbrain is on PATH or \`gbrain doctor --fast --json\` works, ask once:
 
-> gstack can publish your artifacts (CEO plans, designs, reports) to a private GitHub repo that GBrain indexes across machines. How much should sync?
+> mstack can publish your artifacts (CEO plans, designs, reports) to a private GitHub repo that GBrain indexes across machines. How much should sync?
 
 Options:
 - A) Everything allowlisted (recommended)
@@ -147,7 +147,7 @@ After answer:
 "$_BRAIN_CONFIG_BIN" set artifacts_sync_mode_prompted true
 \`\`\`
 
-If A/B and \`~/.gstack/.git\` is missing, ask whether to run \`gstack-artifacts-init\`. Do not block the skill.
+If A/B and \`~/.mstack/.git\` is missing, ask whether to run \`mstack-artifacts-init\`. Do not block the skill.
 
 At skill END before telemetry:
 

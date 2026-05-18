@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# gstack-open-url — cross-platform URL opener
+# mstack-open-url — cross-platform URL opener
 #
 # Usage: gstack-open-url <url>
 set -euo pipefail

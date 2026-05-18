@@ -1,5 +1,5 @@
 /**
- * Terminal Agent — PTY-backed Claude Code terminal for the gstack browser
+ * Terminal Agent — PTY-backed Claude Code terminal for the mstack browser
  * sidebar. Translates the phoenix gbrowser PTY (cmd/gbd/terminal.go) into
  * Bun, with a few changes informed by codex's outside-voice review:
  *
@@ -26,7 +26,7 @@ import * as crypto from 'crypto';
 import { writeSecureFile, mkdirSecure } from './file-permissions';
 import { safeUnlink } from './error-handling';
 
-const STATE_FILE = process.env.BROWSE_STATE_FILE || path.join(process.env.HOME || '/tmp', '.gstack', 'browse.json');
+const STATE_FILE = process.env.BROWSE_STATE_FILE || path.join(process.env.HOME || '/tmp', '.mstack', 'browse.json');
 const PORT_FILE = path.join(path.dirname(STATE_FILE), 'terminal-port');
 const BROWSE_SERVER_PORT = parseInt(process.env.BROWSE_SERVER_PORT || '0', 10);
 const EXTENSION_ID = process.env.BROWSE_EXTENSION_ID || ''; // optional: tighten Origin check
@@ -110,7 +110,7 @@ function writeClaudeAvailable(): void {
  *
  * Two paths claude has:
  *   1. Read live state from <stateDir>/tabs.json + active-tab.json
- *      (updated continuously by the gstack browser extension).
+ *      (updated continuously by the mstack browser extension).
  *   2. Run $B tab, $B tabs, $B tab-each <command> to act on tabs. The
  *      tab-each helper fans a single command across every open tab and
  *      returns per-tab results as JSON.
@@ -119,7 +119,7 @@ function buildTabAwarenessHint(stateDir: string): string {
   const tabsFile = path.join(stateDir, 'tabs.json');
   const activeFile = path.join(stateDir, 'active-tab.json');
   return [
-    'You are running inside the gstack browser sidebar with live access to the user\'s browser tabs.',
+    'You are running inside the mstack browser sidebar with live access to the user\'s browser tabs.',
     '',
     'Tab state files (kept fresh automatically by the extension):',
     `  ${tabsFile}        — all open tabs (id, url, title, active, pinned)`,
@@ -148,7 +148,7 @@ function spawnClaude(cols: number, rows: number, onData: (chunk: Buffer) => void
 
   // Match phoenix env so claude knows which browse server to talk to and
   // doesn't try to autostart its own. BROWSE_HEADED=1 keeps the existing
-  // headed-mode browser; BROWSE_NO_AUTOSTART prevents claude's gstack
+  // headed-mode browser; BROWSE_NO_AUTOSTART prevents claude's mstack
   // tooling from racing to spawn another server.
   const env: Record<string, string> = {
     ...process.env as any,
@@ -271,14 +271,14 @@ function buildServer() {
         }
 
         // Try Sec-WebSocket-Protocol first. Format: a single token, possibly
-        // with a `gstack-pty.` prefix (which we strip). Browsers send a
+        // with a `mstack-pty.` prefix (which we strip). Browsers send a
         // comma-separated list when multiple were requested; we pick the
         // first that matches a known token.
         const protoHeader = req.headers.get('sec-websocket-protocol') || '';
         let token: string | null = null;
         let acceptedProtocol: string | null = null;
         for (const raw of protoHeader.split(',').map(s => s.trim()).filter(Boolean)) {
-          const candidate = raw.startsWith('gstack-pty.') ? raw.slice('gstack-pty.'.length) : raw;
+          const candidate = raw.startsWith('mstack-pty.') ? raw.slice('mstack-pty.'.length) : raw;
           if (validTokens.has(candidate)) {
             token = candidate;
             acceptedProtocol = raw;

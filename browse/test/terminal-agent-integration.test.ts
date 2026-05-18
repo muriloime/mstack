@@ -50,7 +50,7 @@ function readTokenFile(): string {
 }
 
 beforeAll(() => {
-  stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-term-'));
+  stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mstack-term-'));
   const stateFile = path.join(stateDir, 'browse.json');
   // browse.json must exist so the agent's readBrowseToken doesn't throw.
   fs.writeFileSync(stateFile, JSON.stringify({ token: 'test-browse-token' }));
@@ -189,8 +189,8 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
     // chrome-extension origin, so we send the token via the only auth
     // header the browser WebSocket API lets us set: Sec-WebSocket-Protocol.
     //
-    // The browser sends `gstack-pty.<token>` and the agent must:
-    //   1) strip the gstack-pty. prefix
+    // The browser sends `mstack-pty.<token>` and the agent must:
+    //   1) strip the mstack-pty. prefix
     //   2) validate the token
     //   3) ECHO the protocol back in the upgrade response
     // Without (3) the browser closes the connection immediately, which
@@ -214,7 +214,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
         'Upgrade': 'websocket',
         'Sec-WebSocket-Version': '13',
         'Sec-WebSocket-Key': handshakeKey,
-        'Sec-WebSocket-Protocol': `gstack-pty.${token}`,
+        'Sec-WebSocket-Protocol': `mstack-pty.${token}`,
         'Origin': 'chrome-extension://test-extension-id',
       },
     });
@@ -224,7 +224,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
     // (the bug we hit in manual dogfood).
     expect(resp.status).toBe(101);
     expect(resp.headers.get('upgrade')?.toLowerCase()).toBe('websocket');
-    expect(resp.headers.get('sec-websocket-protocol')).toBe(`gstack-pty.${token}`);
+    expect(resp.headers.get('sec-websocket-protocol')).toBe(`mstack-pty.${token}`);
   });
 
   test('Sec-WebSocket-Protocol auth: rejects unknown token even with valid Origin', async () => {
@@ -234,7 +234,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
         'Upgrade': 'websocket',
         'Sec-WebSocket-Version': '13',
         'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
-        'Sec-WebSocket-Protocol': 'gstack-pty.never-granted-token',
+        'Sec-WebSocket-Protocol': 'mstack-pty.never-granted-token',
         'Origin': 'chrome-extension://test-extension-id',
       },
     });

@@ -1,4 +1,4 @@
-// Pure-function tests for bin/gstack-next-version.
+// Pure-function tests for bin/mstack-next-version.
 // Covers the version arithmetic and slot-picking logic. Subprocess paths
 // (gh/glab/git) are covered by the integration test at the bottom (skipped
 // when the relevant CLI isn't available).
@@ -11,7 +11,7 @@ import {
   cmpVersion,
   pickNextSlot,
   markActiveSiblings,
-} from "../bin/gstack-next-version";
+} from "../bin/mstack-next-version";
 
 describe("parseVersion", () => {
   test("accepts 4-digit semver", () => {
@@ -160,7 +160,7 @@ describe("integration (smoke)", () => {
     const proc = Bun.spawnSync([
       "bun",
       "run",
-      "./bin/gstack-next-version",
+      "./bin/mstack-next-version",
       "--base",
       "main",
       "--bump",

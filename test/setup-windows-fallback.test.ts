@@ -70,7 +70,7 @@ describe.skipIf(process.platform === 'win32')('setup: _link_or_copy helper — b
     isWindows: '0' | '1',
     srcKind: 'file' | 'dir',
   ): { ok: boolean; targetIsSymlink: boolean; targetExists: boolean; stderr: string } {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-helper-'));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mstack-helper-'));
     try {
       const src = path.join(tmp, 'source');
       const dst = path.join(tmp, 'dest');

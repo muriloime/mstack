@@ -15,7 +15,7 @@
  *   L5:    Canary (this module — inject + check)
  *   L6:    Threshold aggregation (this module — combineVerdict)
  *
- * Cross-process state lives at ~/.gstack/security/session-state.json
+ * Cross-process state lives at ~/.mstack/security/session-state.json
  * (per eng review finding 1.2 — server.ts and sidebar-agent.ts are different processes).
  */
 
@@ -55,7 +55,7 @@ export type Verdict = 'safe' | 'log_only' | 'warn' | 'block' | 'user_overrode';
 
 export type LayerName =
   | 'testsavant_content'
-  | 'deberta_content'        // opt-in ensemble layer (GSTACK_SECURITY_ENSEMBLE=deberta)
+  | 'deberta_content'        // opt-in ensemble layer (MSTACK_SECURITY_ENSEMBLE=deberta)
   | 'transcript_classifier'
   | 'aria_regex'
   | 'canary';
@@ -318,10 +318,10 @@ export interface AttemptRecord {
   confidence: number;
   layer: LayerName;
   verdict: Verdict;
-  gstackVersion?: string;
+  mstackVersion?: string;
 }
 
-const SECURITY_DIR = path.join(os.homedir(), '.gstack', 'security');
+const SECURITY_DIR = path.join(os.homedir(), '.mstack', 'security');
 const ATTEMPTS_LOG = path.join(SECURITY_DIR, 'attempts.jsonl');
 const SALT_FILE = path.join(SECURITY_DIR, 'device-salt');
 const MAX_LOG_BYTES = 10 * 1024 * 1024; // 10MB rotate threshold (eng review 4.1)
@@ -329,7 +329,7 @@ const MAX_LOG_GENERATIONS = 5;
 
 /**
  * Read-or-create the per-device salt used for payload hashing. Salt lives at
- * ~/.gstack/security/device-salt (0600). Random per-device, prevents rainbow
+ * ~/.mstack/security/device-salt (0600). Random per-device, prevents rainbow
  * table attacks across devices (Codex tier-2 finding).
  */
 let cachedSalt: string | null = null;
@@ -388,20 +388,20 @@ function rotateIfNeeded(): void {
 }
 
 /**
- * Try to locate the gstack-telemetry-log binary. Resolution order matches
+ * Try to locate the mstack-telemetry-log binary. Resolution order matches
  * the existing skill preamble pattern (never relies on PATH — packaged
  * binary layouts can break that).
  *
  * Order:
- *  1. ~/.claude/skills/gstack/bin/gstack-telemetry-log  (global install)
- *  2. .claude/skills/gstack/bin/gstack-telemetry-log    (symlinked dev)
- *  3. bin/gstack-telemetry-log                          (in-repo dev)
+ *  1. ~/.claude/skills/mstack/bin/mstack-telemetry-log  (global install)
+ *  2. .claude/skills/mstack/bin/mstack-telemetry-log    (symlinked dev)
+ *  3. bin/mstack-telemetry-log                          (in-repo dev)
  */
 function findTelemetryBinary(): string | null {
   const candidates = [
-    path.join(os.homedir(), '.claude', 'skills', 'gstack', 'bin', 'gstack-telemetry-log'),
-    path.resolve(process.cwd(), '.claude', 'skills', 'gstack', 'bin', 'gstack-telemetry-log'),
-    path.resolve(process.cwd(), 'bin', 'gstack-telemetry-log'),
+    path.join(os.homedir(), '.claude', 'skills', 'mstack', 'bin', 'mstack-telemetry-log'),
+    path.resolve(process.cwd(), '.claude', 'skills', 'mstack', 'bin', 'mstack-telemetry-log'),
+    path.resolve(process.cwd(), 'bin', 'mstack-telemetry-log'),
   ];
   for (const c of candidates) {
     try {
@@ -416,12 +416,12 @@ function findTelemetryBinary(): string | null {
 
 /**
  * Resolve a bash binary for invoking shebang scripts on Windows. Mirrors the
- * GSTACK_*_BIN override pattern from `browse/src/claude-bin.ts:resolveClaudeCommand`
+ * MSTACK_*_BIN override pattern from `browse/src/claude-bin.ts:resolveClaudeCommand`
  * (introduced in v1.24.0.0 #1252) so users on WSL/MSYS2/non-default Git Bash
  * installs can redirect.
  *
  * Override precedence:
- *   1. GSTACK_BASH_BIN (or BASH_BIN) — absolute path or PATH-resolvable command.
+ *   1. MSTACK_BASH_BIN (or BASH_BIN) — absolute path or PATH-resolvable command.
  *   2. Plain Bun.which('bash') — finds Git Bash on the standard Windows install.
  *
  * Returns null if nothing resolves; callers must degrade gracefully (telemetry
@@ -430,7 +430,7 @@ function findTelemetryBinary(): string | null {
  */
 export function resolveBashBinary(env: NodeJS.ProcessEnv = process.env): string | null {
   const PATH = env.PATH ?? env.Path ?? '';
-  const override = (env.GSTACK_BASH_BIN ?? env.BASH_BIN)?.trim();
+  const override = (env.MSTACK_BASH_BIN ?? env.BASH_BIN)?.trim();
   if (override) {
     const trimmed = override.replace(/^"(.*)"$/, '$1');
     return path.isAbsolute(trimmed) ? trimmed : (Bun.which(trimmed, { PATH }) ?? null);
@@ -443,14 +443,14 @@ export function resolveBashBinary(env: NodeJS.ProcessEnv = process.env): string 
  * in a way that works on both POSIX and Windows.
  *
  * POSIX: returns [bin, args] unchanged — shebang gets honored by execve.
- * Win32: wraps in bash explicitly. `gstack-telemetry-log` is a shell script
+ * Win32: wraps in bash explicitly. `mstack-telemetry-log` is a shell script
  * (`#!/usr/bin/env bash`) and Windows `CreateProcess` can't dispatch on a
  * shebang — it tries to load the file as a PE image, fails with ENOEXEC,
  * and our 'error' handler silently swallows it. Resolves bash via the same
- * Bun.which + GSTACK_*_BIN override pattern as claude-bin.ts.
+ * Bun.which + MSTACK_*_BIN override pattern as claude-bin.ts.
  *
  * Returns null when bash can't be resolved on Windows (rare — Git Bash ships
- * with the standard gstack install path). Caller skips spawn; the local
+ * with the standard mstack install path). Caller skips spawn; the local
  * attempts.jsonl write still gives the audit trail.
  *
  * Exported for testability — resolution is a pure function of (platform,
@@ -470,7 +470,7 @@ export function buildTelemetrySpawnCommand(
 }
 
 /**
- * Fire-and-forget subprocess invocation of gstack-telemetry-log with the
+ * Fire-and-forget subprocess invocation of mstack-telemetry-log with the
  * attack_attempt event type. The binary handles tier gating internally
  * (community → upload, anonymous → local only, off → no-op), so we don't
  * need to re-check here.
@@ -505,7 +505,7 @@ function reportAttemptTelemetry(record: AttemptRecord): void {
 
 /**
  * Append an attempt to the local log AND fire telemetry via
- * gstack-telemetry-log (which respects the user's telemetry tier setting).
+ * mstack-telemetry-log (which respects the user's telemetry tier setting).
  * Never throws — logging failure should not break the sidebar.
  * Returns true if the local write succeeded.
  */
@@ -569,7 +569,7 @@ export function readSessionState(): SessionState | null {
 //
 // When a tool-output BLOCK fires, the user gets to see the suspected text
 // and decide. The sidepanel posts to /security-decision, server writes a
-// per-tab file under ~/.gstack/security/decisions/, sidebar-agent polls
+// per-tab file under ~/.mstack/security/decisions/, sidebar-agent polls
 // for it. File-based on purpose: sidebar-agent.ts is a separate subprocess
 // and this is the same pattern the existing per-tab cancel file uses.
 

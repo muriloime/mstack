@@ -9,21 +9,21 @@ the command output.
 
 ## `BRAIN_SYNC: brain repo detected: <url>`
 
-**Problem.** You're on a machine that has `~/.gstack-brain-remote.txt` (copied
-from another machine) but no local git repo at `~/.gstack/.git`.
+**Problem.** You're on a machine that has `~/.mstack-brain-remote.txt` (copied
+from another machine) but no local git repo at `~/.mstack/.git`.
 
-**Cause.** You've set up GBrain sync elsewhere and your gstack hasn't been
+**Cause.** You've set up GBrain sync elsewhere and your mstack hasn't been
 restored on this machine yet.
 
 **Fix.**
 ```bash
 gstack-brain-restore
 ```
-This pulls the repo into `~/.gstack/` and re-registers merge drivers.
+This pulls the repo into `~/.mstack/` and re-registers merge drivers.
 
 If you don't want to restore here, dismiss the hint with:
 ```bash
-gstack-config set artifacts_sync_mode_prompted true
+mstack-config set artifacts_sync_mode_prompted true
 ```
 
 ---
@@ -83,16 +83,16 @@ git's error appears after the colon.
 **Cause.** Could be network issue, rejected push (remote ahead), server 500,
 or repo access revoked.
 
-**Fix.** Look at `~/.gstack/.brain-sync-status.json` for more detail, or run:
+**Fix.** Look at `~/.mstack/.brain-sync-status.json` for more detail, or run:
 ```bash
-cd ~/.gstack && git status && git push origin HEAD
+cd ~/.mstack && git status && git push origin HEAD
 ```
 to see git's full error. The queue is cleared after any push attempt, but
 your local commit still exists — the next skill run will retry the push.
 
 ---
 
-## `gstack-brain-init: ~/.gstack/.git is already a git repo pointing at <url>`
+## `gstack-brain-init: ~/.mstack/.git is already a git repo pointing at <url>`
 
 **Problem.** You tried to init with a remote URL that doesn't match the
 existing one.
@@ -146,7 +146,7 @@ gstack-brain-init --remote git@github.com:YOURUSER/custom-name.git
 
 ---
 
-## `gstack-brain-restore: ~/.gstack/.git already points at <url>`
+## `gstack-brain-restore: ~/.mstack/.git already points at <url>`
 
 **Problem.** You tried to restore from a URL that doesn't match the existing
 git config.
@@ -157,13 +157,13 @@ git config.
 
 ---
 
-## `gstack-brain-restore: ~/.gstack/ has existing allowlisted files that would be clobbered`
+## `gstack-brain-restore: ~/.mstack/ has existing allowlisted files that would be clobbered`
 
-**Problem.** You're trying to restore, but `~/.gstack/` already contains
+**Problem.** You're trying to restore, but `~/.mstack/` already contains
 learnings or plans that would be overwritten.
 
 **Cause.** Either (a) this machine has accumulated state from a pre-sync
-gstack session, or (b) a previous failed restore left partial state.
+mstack session, or (b) a previous failed restore left partial state.
 
 **Fix (three options).**
 
@@ -172,16 +172,16 @@ gstack session, or (b) a previous failed restore left partial state.
    repo from this machine's state.
 
 2. **If you want to adopt the remote and discard this machine's state**:
-   back up `~/.gstack/projects/` first, then remove the offending files and
+   back up `~/.mstack/projects/` first, then remove the offending files and
    re-run restore.
 
 3. **If you want to merge**: there's no automatic merge for this. Manually
-   copy learnings from `~/.gstack/` into your running gstack on a machine
+   copy learnings from `~/.mstack/` into your running mstack on a machine
    with sync already on, then restore here.
 
 ---
 
-## `gstack-brain-restore: <url> does not look like a gstack-brain repo`
+## `gstack-brain-restore: <url> does not look like a mstack-brain repo`
 
 **Problem.** The clone succeeded but the repo is missing `.brain-allowlist`
 and `.gitattributes`.
@@ -199,10 +199,10 @@ canonical config files from the brain repo.
 **Not an error, but a common gotcha.** Check in order:
 
 1. `gstack-brain-sync --status` — is mode `off`?
-2. `~/.gstack/.git` exists?
-3. `gstack-config get artifacts_sync_mode` — should be `full` or `artifacts-only`.
+2. `~/.mstack/.git` exists?
+3. `mstack-config get artifacts_sync_mode` — should be `full` or `artifacts-only`.
 4. The file you expect to sync — is it in the allowlist?
-   `cat ~/.gstack/.brain-allowlist`
+   `cat ~/.mstack/.brain-allowlist`
 5. Privacy class filter — if mode is `artifacts-only`, behavioral files
    (timelines, developer-profile) are intentionally skipped.
 

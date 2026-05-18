@@ -14,7 +14,7 @@ import * as crypto from 'crypto';
 
 /**
  * Tests for the factory-export API surface added so gbrowser (phoenix) can
- * consume gstack as a submodule. The full buildFetchHandler hybrid hoist is
+ * consume mstack as a submodule. The full buildFetchHandler hybrid hoist is
  * deferred to a follow-up PR; this test file proves the type contract,
  * resolveConfigFromEnv behavior, and preserved exports.
  */
@@ -294,7 +294,7 @@ describe('buildFetchHandler factory contract', () => {
     expect(await resp.text()).toBe('overlay-body');
   });
 
-  test('6. falls through to gstack dispatch when beforeRoute returns null', async () => {
+  test('6. falls through to mstack dispatch when beforeRoute returns null', async () => {
     const handle = buildFetchHandler(makeMinimalConfig({
       beforeRoute: async () => null,
     }));

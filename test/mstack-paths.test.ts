@@ -3,12 +3,12 @@ import { spawnSync } from 'child_process';
 import * as path from 'path';
 
 const ROOT = path.resolve(import.meta.dir, '..');
-const BIN = path.join(ROOT, 'bin', 'gstack-paths');
+const BIN = path.join(ROOT, 'bin', 'mstack-paths');
 
 // Invoke via `bash` rather than executing the shebang-script directly.
 // On Windows, spawnSync(scriptPath, ...) goes through CreateProcess, which
 // doesn't parse `#!/usr/bin/env bash`. Production usage always sources the
-// helper from inside a bash block (`eval "$(~/.claude/skills/gstack/bin/gstack-paths)"`)
+// helper from inside a bash block (`eval "$(~/.claude/skills/mstack/bin/mstack-paths)"`)
 // so bash is always the executor — this matches that contract.
 //
 // USERPROFILE: '' is a Windows-specific override. Git Bash auto-populates
@@ -21,7 +21,7 @@ function run(env: Record<string, string | undefined>): Record<string, string> {
     encoding: 'utf-8',
   });
   if (result.status !== 0) {
-    throw new Error(`gstack-paths failed (status ${result.status}): ${result.stderr}`);
+    throw new Error(`mstack-paths failed (status ${result.status}): ${result.stderr}`);
   }
   const out: Record<string, string> = {};
   for (const line of result.stdout.split('\n')) {
@@ -31,27 +31,27 @@ function run(env: Record<string, string | undefined>): Record<string, string> {
   return out;
 }
 
-describe('gstack-paths', () => {
-  test('GSTACK_HOME wins over CLAUDE_PLUGIN_DATA and HOME', () => {
+describe('mstack-paths', () => {
+  test('MSTACK_HOME wins over CLAUDE_PLUGIN_DATA and HOME', () => {
     const got = run({
-      GSTACK_HOME: '/tmp/explicit-state',
+      MSTACK_HOME: '/tmp/explicit-state',
       CLAUDE_PLUGIN_DATA: '/tmp/plugin-data',
       HOME: '/tmp/home',
     });
-    expect(got.GSTACK_STATE_ROOT).toBe('/tmp/explicit-state');
+    expect(got.MSTACK_STATE_ROOT).toBe('/tmp/explicit-state');
   });
 
-  test('CLAUDE_PLUGIN_DATA wins over HOME when GSTACK_HOME unset', () => {
+  test('CLAUDE_PLUGIN_DATA wins over HOME when MSTACK_HOME unset', () => {
     const got = run({
       CLAUDE_PLUGIN_DATA: '/tmp/plugin-data',
       HOME: '/tmp/home',
     });
-    expect(got.GSTACK_STATE_ROOT).toBe('/tmp/plugin-data');
+    expect(got.MSTACK_STATE_ROOT).toBe('/tmp/plugin-data');
   });
 
-  test('HOME-derived state root when GSTACK_HOME and CLAUDE_PLUGIN_DATA unset', () => {
+  test('HOME-derived state root when MSTACK_HOME and CLAUDE_PLUGIN_DATA unset', () => {
     const got = run({ HOME: '/tmp/myhome' });
-    expect(got.GSTACK_STATE_ROOT).toBe('/tmp/myhome/.gstack');
+    expect(got.MSTACK_STATE_ROOT).toBe('/tmp/myhome/.mstack');
   });
 
   test('CWD fallback when HOME also unset (container env)', () => {
@@ -62,11 +62,11 @@ describe('gstack-paths', () => {
     // script's CWD fallback IS correct — exercised on Linux/Mac CI.
     if (process.platform === 'win32') return;
     const got = run({ HOME: '' });
-    expect(got.GSTACK_STATE_ROOT).toBe('.gstack');
+    expect(got.MSTACK_STATE_ROOT).toBe('.mstack');
   });
 
-  test('PLAN_ROOT chain: GSTACK_PLAN_DIR > CLAUDE_PLANS_DIR > HOME > CWD', () => {
-    expect(run({ GSTACK_PLAN_DIR: '/tmp/explicit', HOME: '/h' }).PLAN_ROOT).toBe('/tmp/explicit');
+  test('PLAN_ROOT chain: MSTACK_PLAN_DIR > CLAUDE_PLANS_DIR > HOME > CWD', () => {
+    expect(run({ MSTACK_PLAN_DIR: '/tmp/explicit', HOME: '/h' }).PLAN_ROOT).toBe('/tmp/explicit');
     expect(run({ CLAUDE_PLANS_DIR: '/tmp/claude', HOME: '/h' }).PLAN_ROOT).toBe('/tmp/claude');
     expect(run({ HOME: '/tmp/myhome' }).PLAN_ROOT).toBe('/tmp/myhome/.claude/plans');
     // CWD fallback only verifiable on POSIX — Git Bash auto-populates HOME.
@@ -75,15 +75,15 @@ describe('gstack-paths', () => {
     }
   });
 
-  test('TMP_ROOT chain: TMPDIR > TMP > .gstack/tmp', () => {
+  test('TMP_ROOT chain: TMPDIR > TMP > .mstack/tmp', () => {
     expect(run({ TMPDIR: '/tmp/x', HOME: '/h' }).TMP_ROOT).toBe('/tmp/x');
     expect(run({ TMP: '/tmp/y', HOME: '/h' }).TMP_ROOT).toBe('/tmp/y');
-    expect(run({ HOME: '' }).TMP_ROOT).toBe('.gstack/tmp');
+    expect(run({ HOME: '' }).TMP_ROOT).toBe('.mstack/tmp');
   });
 
   test('emits all three exports on every invocation', () => {
     const got = run({ HOME: '/tmp/h' });
-    expect(got).toHaveProperty('GSTACK_STATE_ROOT');
+    expect(got).toHaveProperty('MSTACK_STATE_ROOT');
     expect(got).toHaveProperty('PLAN_ROOT');
     expect(got).toHaveProperty('TMP_ROOT');
   });

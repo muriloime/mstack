@@ -4,7 +4,7 @@ You'll run `/document-generate` against a project you already have, watch it wri
 
 ## What you'll need
 
-- gstack installed (`git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup`)
+- mstack installed (`git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/mstack && cd ~/.claude/skills/mstack && ./setup`)
 - Claude Code running in any project that has at least one piece of public surface (a CLI command, an exported function, a config option, a skill, an API endpoint)
 - About 90 seconds
 
@@ -137,6 +137,6 @@ Each one is short enough to maintain. Each one has a single job. The PR body sho
 ## What to do next
 
 - **If you have gaps** /document-release flagged but didn't fill: run `/document-generate` again, scoped to those entities specifically.
-- **If you want to understand why the four quadrants exist:** read [explanation-diataxis-in-gstack.md](./explanation-diataxis-in-gstack.md).
+- **If you want to understand why the four quadrants exist:** read [explanation-diataxis-in-mstack.md](./explanation-diataxis-in-mstack.md).
 - **If you want to document one specific shipped feature** (not the whole project): read [howto-document-a-shipped-feature.md](./howto-document-a-shipped-feature.md).
 - **Reference for the skill itself:** [`document-generate/SKILL.md`](../document-generate/SKILL.md).

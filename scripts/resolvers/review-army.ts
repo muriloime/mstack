@@ -2,7 +2,7 @@
  * Review Army resolver — parallel specialist reviewers for /review
  *
  * Generates template prose that instructs Claude to:
- * 1. Detect stack and scope (via gstack-diff-scope)
+ * 1. Detect stack and scope (via mstack-diff-scope)
  * 2. Select and dispatch specialist subagents in parallel
  * 3. Collect, parse, merge, and deduplicate JSON findings
  * 4. Feed merged findings into the existing Fix-First pipeline
@@ -21,7 +21,7 @@ function generateSpecialistSelection(ctx: TemplateContext): string {
 ### Detect stack and scope
 
 \`\`\`bash
-source <(${ctx.paths.binDir}/gstack-diff-scope <base> 2>/dev/null) || true
+source <(${ctx.paths.binDir}/mstack-diff-scope <base> 2>/dev/null) || true
 # Detect stack for specialist context
 STACK=""
 [ -f Gemfile ] && STACK="\${STACK}ruby "
@@ -47,7 +47,7 @@ echo "TEST_FW: \${TEST_FW:-unknown}"
 ### Read specialist hit rates (adaptive gating)
 
 \`\`\`bash
-${ctx.paths.binDir}/gstack-specialist-stats 2>/dev/null || true
+${ctx.paths.binDir}/mstack-specialist-stats 2>/dev/null || true
 \`\`\`
 
 ### Select specialists
@@ -71,7 +71,7 @@ Based on the scope signals above, select which specialists to dispatch.
 
 After scope-based selection, apply adaptive gating based on specialist hit rates:
 
-For each conditional specialist that passed scope gating, check the \`gstack-specialist-stats\` output above:
+For each conditional specialist that passed scope gating, check the \`mstack-specialist-stats\` output above:
 - If tagged \`[GATE_CANDIDATE]\` (0 findings in 10+ dispatches): skip it. Print: "[specialist] auto-gated (0 findings in N reviews)."
 - If tagged \`[NEVER_GATE]\`: always dispatch regardless of hit rate. Security and data-migration are insurance policy specialists — they should run even when silent.
 

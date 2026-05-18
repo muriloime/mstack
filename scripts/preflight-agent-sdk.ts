@@ -49,7 +49,7 @@ async function main() {
   if (claudePath) {
     pass(`local claude binary: ${claudePath}`);
   } else {
-    fail('`Bun.which("claude")` failed — cannot pin binary (set GSTACK_CLAUDE_BIN to override)');
+    fail('`Bun.which("claude")` failed — cannot pin binary (set MSTACK_CLAUDE_BIN to override)');
   }
 
   // 3. SDK query end-to-end

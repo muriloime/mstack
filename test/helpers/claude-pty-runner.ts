@@ -73,7 +73,7 @@ export interface ClaudePtyOptions {
   /** Terminal size. Default 120x40. Plan-mode UI lays out cleanly at this size. */
   cols?: number;
   rows?: number;
-  /** Working directory. Default: process.cwd(). The repo cwd has the gstack
+  /** Working directory. Default: process.cwd(). The repo cwd has the mstack
    *  skill registry and trusted-folder cookie, so most tests want this. */
   cwd?: string;
   /** Extra env on top of process.env. */
@@ -317,7 +317,7 @@ export function isNumberedOptionListVisible(visible: string): boolean {
 //
 // Cost: ~$0.0005 per call using claude haiku 4.5. Cached by snapshot hash so
 // identical TTY frames don't re-charge. All verdicts logged to
-// ~/.gstack/analytics/pty-judge.jsonl for offline analysis.
+// ~/.mstack/analytics/pty-judge.jsonl for offline analysis.
 // ────────────────────────────────────────────────────────────────────────────
 
 import { spawnSync as nodeSpawnSync } from 'node:child_process';
@@ -341,7 +341,7 @@ const PTY_VERDICT_CACHE = new Map<string, PtyStateVerdict>();
  */
 function logPtyJudge(record: Record<string, unknown>): void {
   try {
-    const dir = `${process.env.HOME}/.gstack/analytics`;
+    const dir = `${process.env.HOME}/.mstack/analytics`;
     fs.mkdirSync(dir, { recursive: true });
     fs.appendFileSync(`${dir}/pty-judge.jsonl`, JSON.stringify(record) + '\n');
   } catch {
@@ -350,14 +350,14 @@ function logPtyJudge(record: Record<string, unknown>): void {
 }
 
 /**
- * Snapshot dump for postmortem debugging when GSTACK_PTY_LOG=1.
+ * Snapshot dump for postmortem debugging when MSTACK_PTY_LOG=1.
  * Writes the last 4KB of visible TTY plus context to
- * ~/.gstack/analytics/pty-snapshots/<testName>-<elapsed>ms.txt.
+ * ~/.mstack/analytics/pty-snapshots/<testName>-<elapsed>ms.txt.
  */
 export function logPtySnapshot(visible: string, ctx: { testName: string; elapsedMs: number; tag?: string }): void {
-  if (process.env.GSTACK_PTY_LOG !== '1') return;
+  if (process.env.MSTACK_PTY_LOG !== '1') return;
   try {
-    const dir = `${process.env.HOME}/.gstack/analytics/pty-snapshots`;
+    const dir = `${process.env.HOME}/.mstack/analytics/pty-snapshots`;
     fs.mkdirSync(dir, { recursive: true });
     const tag = ctx.tag ? `-${ctx.tag}` : '';
     const file = `${dir}/${ctx.testName}-${ctx.elapsedMs}ms${tag}.txt`;
@@ -706,7 +706,7 @@ export type ClassifyResult =
 
 const SANCTIONED_WRITE_SUBSTRINGS = [
   '.claude/plans',
-  '.gstack/',
+  '.mstack/',
   '/.context/',
   'CHANGELOG.md',
   'TODOS.md',
@@ -1583,7 +1583,7 @@ export async function runPlanSkillObservation(opts: {
       // burned >60s with periodic ticks, ask Haiku "is the model waiting,
       // working, or hung?" Treat 'waiting' as 'asked' (model surfaced a
       // question via prose the regex couldn't reassemble). Snapshot the
-      // visible buffer at each judge call when GSTACK_PTY_LOG=1.
+      // visible buffer at each judge call when MSTACK_PTY_LOG=1.
       const elapsed = Date.now() - start;
       if (elapsed > JUDGE_AFTER_MS && Date.now() - lastJudgeAt > JUDGE_INTERVAL_MS) {
         lastJudgeAt = Date.now();

@@ -6,8 +6,8 @@ const hermes: HostConfig = {
   cliCommand: 'hermes',
   cliAliases: [],
 
-  globalRoot: '.hermes/skills/gstack',
-  localSkillRoot: '.hermes/skills/gstack',
+  globalRoot: '.hermes/skills/mstack',
+  localSkillRoot: '.hermes/skills/mstack',
   hostSubdir: '.hermes',
   usesEnvVars: true,
 
@@ -24,8 +24,8 @@ const hermes: HostConfig = {
   },
 
   pathRewrites: [
-    { from: '~/.claude/skills/gstack', to: '~/.hermes/skills/gstack' },
-    { from: '.claude/skills/gstack', to: '.hermes/skills/gstack' },
+    { from: '~/.claude/skills/mstack', to: '~/.hermes/skills/mstack' },
+    { from: '.claude/skills/mstack', to: '.hermes/skills/mstack' },
     { from: '.claude/skills', to: '.hermes/skills' },
     { from: 'CLAUDE.md', to: 'AGENTS.md' },
   ],
@@ -55,7 +55,7 @@ const hermes: HostConfig = {
   ],
 
   runtimeRoot: {
-    globalSymlinks: ['bin', 'browse/dist', 'browse/bin', 'gstack-upgrade', 'ETHOS.md'],
+    globalSymlinks: ['bin', 'browse/dist', 'browse/bin', 'mstack-upgrade', 'ETHOS.md'],
     globalFiles: {
       'review': ['checklist.md', 'TODOS-format.md'],
     },

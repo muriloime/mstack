@@ -23,7 +23,7 @@ const FORBIDDEN_PATTERNS = [
 ];
 
 // Per the preamble resolver: generated docs DO contain the
-// "~/.gstack-brain-remote.txt" string in the migration-window fallback. We
+// "~/.mstack-brain-remote.txt" string in the migration-window fallback. We
 // don't grep for that — it's intentional. We grep for the call-site
 // identifiers only.
 

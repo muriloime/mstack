@@ -6,8 +6,8 @@ const opencode: HostConfig = {
   cliCommand: 'opencode',
   cliAliases: [],
 
-  globalRoot: '.config/opencode/skills/gstack',
-  localSkillRoot: '.opencode/skills/gstack',
+  globalRoot: '.config/opencode/skills/mstack',
+  localSkillRoot: '.opencode/skills/mstack',
   hostSubdir: '.opencode',
   usesEnvVars: true,
 
@@ -23,15 +23,15 @@ const opencode: HostConfig = {
   },
 
   pathRewrites: [
-    { from: '~/.claude/skills/gstack', to: '~/.config/opencode/skills/gstack' },
-    { from: '.claude/skills/gstack', to: '.opencode/skills/gstack' },
+    { from: '~/.claude/skills/mstack', to: '~/.config/opencode/skills/mstack' },
+    { from: '.claude/skills/mstack', to: '.opencode/skills/mstack' },
     { from: '.claude/skills', to: '.opencode/skills' },
   ],
 
   suppressedResolvers: ['GBRAIN_CONTEXT_LOAD', 'GBRAIN_SAVE_RESULTS'],
 
   runtimeRoot: {
-    globalSymlinks: ['bin', 'browse/dist', 'browse/bin', 'design/dist', 'gstack-upgrade', 'ETHOS.md', 'review/specialists', 'qa/templates', 'qa/references', 'plan-devex-review/dx-hall-of-fame.md'],
+    globalSymlinks: ['bin', 'browse/dist', 'browse/bin', 'design/dist', 'mstack-upgrade', 'ETHOS.md', 'review/specialists', 'qa/templates', 'qa/references', 'plan-devex-review/dx-hall-of-fame.md'],
     globalFiles: {
       'review': ['checklist.md', 'design-checklist.md', 'greptile-triage.md', 'TODOS-format.md'],
     },
